@@ -1,515 +1,146 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>脉冲星查看器</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>脉冲星查看器</title>
 
-    :root {
-      --pulsar-blue: #00d4ff;
-      --pulsar-cyan: #00fff7;
-      --pulsar-white: #ffffff;
-      --deep-space: #0a0e27;
-      --beam-width-deg: 2;           /* 单束角宽（度） */
-      --beam-blur: 15px;             /* 光束模糊 */
-      --ui-blur: 20px;
-    }
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
 
-    body {
-      width: 100vw; height: 100vh;
-      background: radial-gradient(ellipse at center, #1a1f3a 0%, #0a0e27 50%, #000000 100%);
-      overflow: hidden;
-      font-family: 'Courier New', monospace;
-      color: white;
-      position: relative;
-    }
+:root{
+  --blue:#00d4ff;
+  --cyan:#00fff7;
+  --bg:#0a0e27;
+  --blur:20px;
+}
 
-    /* 深空星场 */
-    .starfield{
-      position: fixed; inset: 0;
-      background-image:
-        radial-gradient(2px 2px at 20px 30px, white, transparent),
-        radial-gradient(2px 2px at 60px 70px, white, transparent),
-        radial-gradient(1px 1px at 50px 50px, white, transparent),
-        radial-gradient(1px 1px at 130px 80px, white, transparent),
-        radial-gradient(2px 2px at 90px 10px, white, transparent);
-      background-size: 200px 200px;
-      animation: twinkle 4s infinite;
-      opacity: 0.6;
-    }
-    @keyframes twinkle { 0%,100%{opacity:.6} 50%{opacity:.9} }
+body{
+  width:100vw;height:100vh;
+  background:radial-gradient(circle,#1a1f3a,#000);
+  color:white;
+  font-family:Courier New,monospace;
+  overflow:hidden;
+}
 
-    /* 脉冲星核心 */
-    .pulsar-core{
-      position: fixed;
-      width: 300px; height: 300px;
-      top: -150px; right: -150px;
-      background: radial-gradient(circle, var(--pulsar-cyan) 0%, transparent 70%);
-      border-radius: 50%;
-      opacity: .3; filter: blur(50px);
-      animation: pulsate 2s ease-in-out infinite;
-      pointer-events: none; z-index: 1;
-    }
-    @keyframes pulsate {
-      0%,100%{transform:scale(1); opacity:.3}
-      50%{transform:scale(1.3); opacity:.6}
-    }
+/* ===== 查看区 ===== */
+.viewer{
+  position:absolute;
+  inset:80px 20px 120px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    /* 双光束（两元素，严格对称） */
-    .beam{
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 1;
-      transform-origin: 50% 50%;
-      animation: fastRotate 3s linear infinite;
-    }
-    /* 主束：朝向0°附近 */
-    .beam--a::before{
-      content: '';
-      position: absolute; top: 50%; left: 50%;
-      width: 300vh; height: 300vh; transform: translate(-50%,-50%);
-      filter: blur(var(--beam-blur));
-      background: conic-gradient(
-        from 0deg at 50% 50%,
-        transparent calc(90deg - var(--beam-width-deg)),
-        rgba(0,255,247,0.1) calc(90deg - var(--beam-width-deg)/2),
-        rgba(0,255,247,0.4) calc(90deg - var(--beam-width-deg)/3),
-        rgba(0,212,255,0.7) 90deg,
-        rgba(0,255,247,0.4) calc(90deg + var(--beam-width-deg)/3),
-        rgba(0,255,247,0.1) calc(90deg + var(--beam-width-deg)/2),
-        transparent calc(90deg + var(--beam-width-deg))
-      );
-      box-shadow: 0 0 100px rgba(0,255,247,0.6);
-    }
-    /* 对向束：+180° */
-    .beam--b::before{
-      content: '';
-      position: absolute; top: 50%; left: 50%;
-      width: 300vh; height: 300vh; transform: translate(-50%,-50%);
-      filter: blur(var(--beam-blur));
-      background: conic-gradient(
-        from 180deg at 50% 50%,
-        transparent calc(90deg - var(--beam-width-deg)),
-        rgba(0,255,247,0.1) calc(90deg - var(--beam-width-deg)/2),
-        rgba(0,255,247,0.4) calc(90deg - var(--beam-width-deg)/3),
-        rgba(0,212,255,0.7) 90deg,
-        rgba(0,255,247,0.4) calc(90deg + var(--beam-width-deg)/3),
-        rgba(0,255,247,0.1) calc(90deg + var(--beam-width-deg)/2),
-        transparent calc(90deg + var(--beam-width-deg))
-      );
-      box-shadow: 0 0 100px rgba(0,255,247,0.6);
-    }
-    @keyframes fastRotate { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+img,iframe{
+  max-width:90vw;
+  max-height:80vh;
+  border-radius:12px;
+  box-shadow:0 0 40px rgba(0,212,255,.6);
+  border:1px solid var(--blue);
+  background:#fff;
+}
 
-    /* 能量波纹（用额外类精确控制延迟） */
-    .energy-ring{
-      position: fixed; width: 800px; height: 800px;
-      top: 50%; left: 50%; margin: -400px 0 0 -400px;
-      border: 2px solid var(--pulsar-blue); border-radius: 50%;
-      opacity: 0; pointer-events: none; z-index: 0;
-      animation: expand 4s ease-out infinite;
-    }
-    .energy-ring.r2 { animation-delay: 1s; }
-    .energy-ring.r3 { animation-delay: 2s; }
-    .energy-ring.r4 { animation-delay: 3s; }
-    @keyframes expand { 0%{transform:scale(0);opacity:.8} 100%{transform:scale(2);opacity:0} }
+/* ===== 底部控制台（始终显示） ===== */
+.bottom-bar{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:16px;
+  padding:14px 26px;
+  background:rgba(10,14,39,.75);
+  backdrop-filter:blur(var(--blur));
+  border:1px solid var(--blue);
+  border-radius:18px;
+  box-shadow:0 0 30px rgba(0,212,255,.4);
+  z-index:9999;
+}
 
-    /* 顶部控制栏 */
-    .top-bar{
-      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-      width: calc(100% - 80px); max-width: 1200px; height: 64px;
-      background: rgba(10, 14, 39, 0.7); backdrop-filter: blur(var(--ui-blur));
-      border: 1px solid var(--pulsar-blue); border-radius: 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; z-index: 1000;
-      box-shadow: 0 0 30px rgba(0,212,255,0.4), inset 0 0 30px rgba(0,212,255,0.1);
-      animation: glowPulse 2s ease-in-out infinite;
-    }
-    @keyframes glowPulse{
-      0%,100%{box-shadow:0 0 30px rgba(0,212,255,.4), inset 0 0 30px rgba(0,212,255,.1)}
-      50%{box-shadow:0 0 50px rgba(0,212,255,.6), inset 0 0 50px rgba(0,212,255,.2)}
-    }
-    .file-info{display:flex; align-items:center; gap:16px;}
-    .file-icon{
-      width: 42px; height: 42px; border-radius: 12px;
-      background: radial-gradient(circle, var(--pulsar-cyan), var(--pulsar-blue));
-      display:flex; align-items:center; justify-content:center;
-      font-size: 20px; box-shadow: 0 0 20px var(--pulsar-cyan);
-      animation: iconPulse 2s ease-in-out infinite;
-    }
-    @keyframes iconPulse{
-      0%,100%{transform:scale(1); box-shadow:0 0 20px var(--pulsar-cyan)}
-      50%{transform:scale(1.1); box-shadow:0 0 40px var(--pulsar-cyan)}
-    }
-    .file-name{
-      font-size: 15px; font-weight: 700; color: var(--pulsar-cyan);
-      text-shadow: 0 0 10px var(--pulsar-cyan); letter-spacing: 1.2px;
-      max-width: 58vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .controls{display:flex; gap:10px;}
-
-    /* 脉冲按钮 */
-    .pulse-btn{
-      width: 42px; height: 42px; border: 2px solid var(--pulsar-blue);
-      background: rgba(0,212,255,.1); color: var(--pulsar-cyan);
-      border-radius: 10px; cursor: pointer; font-size: 18px;
-      display:flex; align-items:center; justify-content:center;
-      transition: all .25s ease; position: relative; overflow: hidden;
-    }
-    .pulse-btn::before{
-      content:''; position:absolute; top:50%; left:50%; width:0; height:0; border-radius:50%;
-      background: rgba(0,255,247,.3); transform: translate(-50%,-50%); transition: width .6s, height .6s;
-    }
-    .pulse-btn:hover{ background: rgba(0,212,255,.2); box-shadow: 0 0 22px var(--pulsar-blue); transform: translateY(-2px); }
-    .pulse-btn:hover::before{ width: 100px; height: 100px; }
-    .pulse-btn:active{ transform: translateY(0) scale(.96); }
-
-    /* 查看区域（收紧宽度） */
-    .viewer-area{
-      position: absolute;
-      top: 100px; left: 32px; right: 32px; bottom: 120px;
-      display:flex; align-items:center; justify-content:center; z-index:10;
-    }
-    .image-container{
-      position: relative; display:inline-flex; align-items:center; justify-content:center;
-      animation: materialize 1s ease-out;
-      border-radius: 12px; border: 1px solid var(--pulsar-blue);
-      box-shadow: 0 0 36px rgba(0,212,255,.45), 0 0 72px rgba(0,255,247,.25);
-      overflow: visible; padding: 0;
-      /* 关键：收紧容器宽度（随图而定，上限 50vw/90vh） */
-      max-width: min(50vw, 90vh);
-      max-height: min(76vh, 90vw);
-      background: rgba(0,0,0,.12);
-      backdrop-filter: blur(6px);
-    }
-    @keyframes materialize{
-      from{opacity:0; transform:scale(.88); filter: blur(18px)}
-      to{opacity:1; transform:scale(1); filter: blur(0)}
-    }
-    .viewer-image{
-      display:block; width: 100%; height: auto; object-fit: contain;
-      cursor: grab; user-select: none; transition: transform .1s ease-out;
-      border-radius: 12px;
-    }
-    .viewer-image:active{ cursor: grabbing; }
-
-    .pdf-frame{
-      width: min(80vw, 1200px);
-      height: min(78vh, 1200px);
-      border: 1px solid var(--pulsar-blue); background: white;
-      border-radius: 12px; box-shadow: 0 0 36px rgba(0,212,255,.5);
-    }
-
-    /* 底部控制台 */
-    .bottom-console{
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-      display:flex; align-items:center; gap: 16px;
-      background: rgba(10,14,39,.7); backdrop-filter: blur(var(--ui-blur));
-      padding: 14px 28px; border-radius: 18px; border: 1px solid var(--pulsar-blue);
-      z-index: 100; box-shadow: 0 0 32px rgba(0,212,255,.4), inset 0 0 24px rgba(0,212,255,.1);
-      animation: slideUp .8s cubic-bezier(.16,1,.3,1);
-    }
-    @keyframes slideUp{ from{opacity:0; transform:translateX(-50%) translateY(60px)} to{opacity:1; transform:translateX(-50%) translateY(0)} }
-    .zoom-display{
-      min-width: 84px; text-align:center; font-size: 15px; font-weight: 800; color: var(--pulsar-cyan);
-      padding: 8px 16px; background: rgba(0,212,255,.1); border-radius: 10px; border: 1px solid var(--pulsar-blue);
-      text-shadow: 0 0 10px var(--pulsar-cyan); letter-spacing: 1.5px;
-    }
-
-    /* 加载与错误 */
-    .loading{ position:absolute; top:50%; left:50%; transform: translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:24px; z-index:10; }
-    .pulsar-loader{ width:100px; height:100px; position:relative; }
-    .pulsar-loader::before, .pulsar-loader::after{
-      content:''; position:absolute; border-radius:50%; animation: pulse-ring 2s ease-out infinite;
-      width:100px; height:100px; border:3px solid var(--pulsar-cyan);
-    }
-    .pulsar-loader::after{ border-color: var(--pulsar-blue); animation-delay: 1s; }
-    @keyframes pulse-ring{ 0%{transform:scale(.5); opacity:1} 100%{transform:scale(1.5); opacity:0} }
-    .loading-text{ color: var(--pulsar-cyan); font-size: 16px; letter-spacing: 3px; text-shadow: 0 0 20px var(--pulsar-cyan); animation: blink 1.5s ease-in-out infinite; }
-    @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:.3} }
-
-    .error-box{ text-align:center; padding:32px; background: rgba(255,50,50,.1); border:2px solid #ff3232; border-radius:16px; backdrop-filter: blur(10px); box-shadow: 0 0 32px rgba(255,50,50,.4); }
-    .error-icon{ font-size: 56px; margin-bottom: 16px; filter: drop-shadow(0 0 20px rgba(255,50,50,.8)); }
-    .error-message{ font-size: 16px; color:#ff6b6b; text-shadow: 0 0 10px rgba(255,50,50,.5); }
-
-    /* 工具提示 */
-    .tooltip{
-      position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%);
-      background: rgba(10,14,39,.9); backdrop-filter: blur(var(--ui-blur));
-      padding: 10px 18px; border-radius: 10px; border: 1px solid var(--pulsar-cyan);
-      color: var(--pulsar-cyan); font-size: 13px; letter-spacing: 1px; text-shadow: 0 0 10px var(--pulsar-cyan);
-      opacity: 0; transition: opacity .25s; z-index: 1001; box-shadow: 0 0 26px rgba(0,255,247,.5); pointer-events: none;
-    }
-    .tooltip.show{ opacity: 1; }
-
-    /* 全屏模式 */
-    .fullscreen-mode{ position: fixed !important; inset: 0 !important; max-width: 100vw !important; max-height: 100vh !important; width: 100vw !important; height: 100vh !important; }
-    .fullscreen-mode .viewer-image{ max-width: 98vw; max-height: 98vh; }
-
-    /* 响应式：小屏更宽松 */
-    @media (max-width: 768px){
-      .image-container{ max-width: 85vw; max-height: 70vh; }
-      .pdf-frame{ width: 92vw; height: 70vh; }
-      .file-name{ max-width: 50vw; }
-    }
-  </style>
+/* 按钮 */
+.btn{
+  width:46px;
+  height:46px;
+  border-radius:12px;
+  border:2px solid var(--blue);
+  background:rgba(0,212,255,.12);
+  color:var(--cyan);
+  font-size:20px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:.25s;
+}
+.btn:hover{
+  background:rgba(0,212,255,.25);
+  box-shadow:0 0 20px var(--cyan);
+  transform:translateY(-2px);
+}
+.btn:active{transform:scale(.95)}
+</style>
 </head>
+
 <body>
-  <!-- 背景 -->
-  <div class="starfield"></div>
-  <div class="pulsar-core"></div>
 
-  <!-- 双光束：严格对称 -->
-  <div class="beam beam--a"></div>
-  <div class="beam beam--b"></div>
+<div class="viewer" id="viewer">
+  <div id="status">LOADING…</div>
+</div>
 
-  <!-- 能量波纹（用类名控制延迟） -->
-  <div class="energy-ring r1"></div>
-  <div class="energy-ring r2"></div>
-  <div class="energy-ring r3"></div>
-  <div class="energy-ring r4"></div>
+<!-- ✅ 底部始终存在 -->
+<div class="bottom-bar">
+  <button class="btn" id="backBtn" title="返回上一级">↩</button>
+  <button class="btn" id="downloadBtn" title="下载">⬇</button>
+</div>
 
-  <!-- 顶部控制栏 -->
-  <div class="top-bar">
-    <div class="file-info">
-      <div class="file-icon" id="fileIcon">📄</div>
-      <div class="file-name" id="fileName">INITIALIZING...</div>
-    </div>
-    <div class="controls">
-      <button class="pulse-btn" id="downloadBtn" title="下载">⬇</button>
-      <button class="pulse-btn" id="fullscreenBtn" title="全屏">⛶</button>
-    </div>
-  </div>
+<script>
+/* ====== 返回逻辑（100% 可用） ====== */
+function goBack(){
+  if (document.referrer && document.referrer !== location.href){
+    location.href = document.referrer;
+  }else{
+    history.back();
+  }
+}
 
-  <!-- 查看区域 -->
-  <div class="viewer-area" id="viewerArea">
-    <div class="loading" id="loading">
-      <div class="pulsar-loader"></div>
-      <div class="loading-text">LOADING...</div>
-    </div>
-  </div>
+document.getElementById('backBtn').onclick = goBack;
 
-  <!-- 底部控制台（已加入“返回上一级”按钮） -->
-  <div class="bottom-console" id="bottomConsole" style="display:none;">
-    <button class="pulse-btn" id="backBtn" title="返回上一级">↩</button>
-    <button class="pulse-btn" id="zoomOutBtn">−</button>
-    <div class="zoom-display" id="zoomDisplay">50%</div>
-    <button class="pulse-btn" id="zoomInBtn">+</button>
-    <button class="pulse-btn" id="resetBtn">⟲</button>
-  </div>
+/* ====== 下载 ====== */
+document.getElementById('downloadBtn').onclick = ()=>{
+  if(!fileUrl) return;
+  const a=document.createElement('a');
+  a.href=fileUrl;
+  a.download='';
+  a.click();
+};
 
-  <!-- 工具提示 -->
-  <div class="tooltip" id="tooltip"></div>
+/* ====== 文件加载 ====== */
+const params=new URLSearchParams(location.search);
+const fileUrl=params.get("file");
+const viewer=document.getElementById("viewer");
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileUrl = urlParams.get("file");
+if(!fileUrl){
+  viewer.innerHTML="<h2>NO FILE</h2>";
+}else if(/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(fileUrl)){
+  const img=new Image();
+  img.src=fileUrl;
+  img.onload=()=>viewer.innerHTML="",viewer.appendChild(img);
+  img.onerror=()=>viewer.innerHTML="<h2>IMAGE LOAD FAILED</h2>";
+}else if(/\.pdf$/i.test(fileUrl)){
+  const iframe=document.createElement("iframe");
+  iframe.src=fileUrl;
+  viewer.innerHTML="";
+  viewer.appendChild(iframe);
+}else{
+  viewer.innerHTML="<h2>UNSUPPORTED FILE</h2>";
+}
 
-    const viewerArea   = document.getElementById('viewerArea');
-    const loading      = document.getElementById('loading');
-    const bottomConsole= document.getElementById('bottomConsole');
-    const fileNameEl   = document.getElementById('fileName');
-    const fileIcon     = document.getElementById('fileIcon');
-    const zoomDisplay  = document.getElementById('zoomDisplay');
-    const tooltip      = document.getElementById('tooltip');
+/* ====== 键盘快捷键 ====== */
+document.addEventListener("keydown",e=>{
+  if(e.key==="b"||e.key==="B") goBack();
+});
+</script>
 
-    let currentScale = 0.5;     // 初始 50%
-    let currentImage = null;
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let translateX = 0, translateY = 0;
-    let isFullscreen = false;
-    let isPDF = false;
-
-    function loadFile(url){
-      const filename = decodeURIComponent(url.split('/').pop().split('?')[0]);
-      fileNameEl.textContent = filename.toUpperCase();
-
-      if (/\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(url)){
-        fileIcon.textContent = '🖼️';
-        loadImage(url);
-      } else if (/\.pdf$/i.test(url)){
-        fileIcon.textContent = '📑';
-        loadPDF(url);
-      } else {
-        showError('UNSUPPORTED FILE TYPE');
-      }
-    }
-
-    function loadImage(url){
-      const img = new Image();
-      img.onload = function(){
-        loading.style.display = 'none';
-
-        const container = document.createElement('div');
-        container.className = 'image-container';
-        container.id = 'imageContainer';
-
-        img.className = 'viewer-image';
-        img.id = 'viewerImage';
-
-        container.appendChild(img);
-        viewerArea.appendChild(container);
-
-        currentImage = img;
-        bottomConsole.style.display = 'flex';
-
-        setupImageControls();
-        updateTransform();
-        updateZoomDisplay();
-      };
-      img.onerror = function(){ showError('IMAGE LOAD FAILED'); };
-      img.src = url;
-    }
-
-    function loadPDF(url){
-      loading.style.display = 'none';
-      isPDF = true;
-
-      const iframe = document.createElement('iframe');
-      iframe.className = 'pdf-frame';
-      iframe.src = url + '#view=FitH';
-      viewerArea.appendChild(iframe);
-
-      // 如果你也想在看 PDF 时显示底部栏（含返回按钮），取消注释下一行：
-      // bottomConsole.style.display = 'flex';
-    }
-
-    function setupImageControls(){
-      currentImage.addEventListener('mousedown', (e)=>{
-        isDragging = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-      });
-
-      document.addEventListener('mousemove', (e)=>{
-        if (!isDragging) return;
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        updateTransform();
-      });
-
-      document.addEventListener('mouseup', ()=>{ isDragging = false; });
-
-      viewerArea.addEventListener('wheel', (e)=>{
-        if (!currentImage) return;
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.15 : 0.15;
-        currentScale = Math.max(0.1, Math.min(5, currentScale + delta));
-        updateTransform();
-        updateZoomDisplay();
-      }, { passive: false });
-
-      currentImage.addEventListener('dblclick', resetView);
-    }
-
-    function updateTransform(){
-      if (!currentImage) return;
-      currentImage.style.transform = `scale(${currentScale}) translate(${translateX / currentScale}px, ${translateY / currentScale}px)`;
-    }
-
-    function updateZoomDisplay(){
-      zoomDisplay.textContent = Math.round(currentScale * 100) + '%';
-    }
-
-    function resetView(){
-      currentScale = 0.5;
-      translateX = 0; translateY = 0;
-      updateTransform();
-      updateZoomDisplay();
-      showTooltip('VIEW RESET');
-    }
-
-    function downloadFile(){
-      if (!fileUrl) return;
-      const filename = fileNameEl.textContent || 'download';
-      const a = document.createElement('a');
-      a.href = fileUrl; a.download = filename;
-      document.body.appendChild(a);
-      setTimeout(()=>{
-        a.click();
-        showTooltip('DOWNLOAD STARTED');
-        setTimeout(()=>document.body.removeChild(a), 100);
-      }, 0);
-    }
-
-    function showTooltip(message){
-      tooltip.textContent = message;
-      tooltip.classList.add('show');
-      setTimeout(()=>tooltip.classList.remove('show'), 1800);
-    }
-
-    function showError(message){
-      loading.innerHTML = `
-        <div class="error-box">
-          <div class="error-icon">⚠️</div>
-          <div class="error-message">${message}</div>
-        </div>`;
-    }
-
-    // 返回上一级（新增）
-    function goBack(){
-      if (document.referrer && document.referrer !== location.href) {
-        window.location.href = document.referrer;
-      } else {
-        history.back();
-      }
-    }
-
-    // 控件事件
-    document.getElementById('backBtn').addEventListener('click', ()=>{
-      goBack();
-      showTooltip('GOING BACK');
-    });
-
-    document.getElementById('zoomInBtn').addEventListener('click', ()=>{
-      currentScale = Math.min(5, currentScale + 0.25);
-      updateTransform(); updateZoomDisplay();
-    });
-    document.getElementById('zoomOutBtn').addEventListener('click', ()=>{
-      currentScale = Math.max(0.1, currentScale - 0.25);
-      updateTransform(); updateZoomDisplay();
-    });
-    document.getElementById('resetBtn').addEventListener('click', resetView);
-    document.getElementById('downloadBtn').addEventListener('click', downloadFile);
-
-    document.getElementById('fullscreenBtn').addEventListener('click', ()=>{
-      if (!document.fullscreenElement){ document.documentElement.requestFullscreen(); }
-      else { document.exitFullscreen(); }
-    });
-
-    document.addEventListener('fullscreenchange', ()=>{
-      isFullscreen = !!document.fullscreenElement;
-      const container = document.getElementById('imageContainer');
-      if (container){ container.classList.toggle('fullscreen-mode', isFullscreen); }
-    });
-
-    document.addEventListener('keydown', (e)=>{
-      // 允许 PDF 也能返回：只跳过缩放快捷键即可
-      switch(e.key.toLowerCase()){
-        case 'b': e.preventDefault(); goBack(); break;          // 新增：B 返回
-        case '+':
-        case '=':
-          if (isPDF) return;
-          e.preventDefault(); document.getElementById('zoomInBtn').click(); break;
-        case '-':
-          if (isPDF) return;
-          e.preventDefault(); document.getElementById('zoomOutBtn').click(); break;
-        case 'r':
-          if (isPDF) return;
-          e.preventDefault(); resetView(); break;
-        case 'f':
-          e.preventDefault(); document.getElementById('fullscreenBtn').click(); break;
-        case 'd':
-          e.preventDefault(); downloadFile(); break;
-      }
-    });
-
-    // 初始化
-    if (!fileUrl){ showError('NO FILE SPECIFIED'); }
-    else { loadFile(fileUrl); }
-  </script>
 </body>
 </html>
-
