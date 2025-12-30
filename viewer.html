@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>脉冲星查看器</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -290,8 +290,9 @@
     </div>
   </div>
 
-  <!-- 底部控制台 -->
+  <!-- 底部控制台（已加入“返回上一级”按钮） -->
   <div class="bottom-console" id="bottomConsole" style="display:none;">
+    <button class="pulse-btn" id="backBtn" title="返回上一级">↩</button>
     <button class="pulse-btn" id="zoomOutBtn">−</button>
     <div class="zoom-display" id="zoomDisplay">50%</div>
     <button class="pulse-btn" id="zoomInBtn">+</button>
@@ -370,6 +371,9 @@
       iframe.className = 'pdf-frame';
       iframe.src = url + '#view=FitH';
       viewerArea.appendChild(iframe);
+
+      // 如果你也想在看 PDF 时显示底部栏（含返回按钮），取消注释下一行：
+      // bottomConsole.style.display = 'flex';
     }
 
     function setupImageControls(){
@@ -444,7 +448,21 @@
         </div>`;
     }
 
+    // 返回上一级（新增）
+    function goBack(){
+      if (document.referrer && document.referrer !== location.href) {
+        window.location.href = document.referrer;
+      } else {
+        history.back();
+      }
+    }
+
     // 控件事件
+    document.getElementById('backBtn').addEventListener('click', ()=>{
+      goBack();
+      showTooltip('GOING BACK');
+    });
+
     document.getElementById('zoomInBtn').addEventListener('click', ()=>{
       currentScale = Math.min(5, currentScale + 0.25);
       updateTransform(); updateZoomDisplay();
@@ -468,14 +486,23 @@
     });
 
     document.addEventListener('keydown', (e)=>{
-      if (isPDF) return;
+      // 允许 PDF 也能返回：只跳过缩放快捷键即可
       switch(e.key.toLowerCase()){
+        case 'b': e.preventDefault(); goBack(); break;          // 新增：B 返回
         case '+':
-        case '=': e.preventDefault(); document.getElementById('zoomInBtn').click(); break;
-        case '-': e.preventDefault(); document.getElementById('zoomOutBtn').click(); break;
-        case 'r': e.preventDefault(); resetView(); break;
-        case 'f': e.preventDefault(); document.getElementById('fullscreenBtn').click(); break;
-        case 'd': e.preventDefault(); downloadFile(); break;
+        case '=':
+          if (isPDF) return;
+          e.preventDefault(); document.getElementById('zoomInBtn').click(); break;
+        case '-':
+          if (isPDF) return;
+          e.preventDefault(); document.getElementById('zoomOutBtn').click(); break;
+        case 'r':
+          if (isPDF) return;
+          e.preventDefault(); resetView(); break;
+        case 'f':
+          e.preventDefault(); document.getElementById('fullscreenBtn').click(); break;
+        case 'd':
+          e.preventDefault(); downloadFile(); break;
       }
     });
 
@@ -485,3 +512,4 @@
   </script>
 </body>
 </html>
+
