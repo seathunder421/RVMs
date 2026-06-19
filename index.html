@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pulsar Geometrical Parameters | RVMs</title>
+    <title>Pulsar Emission-Geometry Parameters | RVMs</title>
     <meta
       name="description"
-      content="Premium RVMs pulsar parameter atlas with a stable starfield interface and native CSV-driven table controls."
+      content="Premium RVMs pulsar parameter atlas with a stable CSV-driven interface."
     />
     <style>
       :root {
@@ -14,15 +14,17 @@
         --bg-soft: #0a1428;
         --panel: rgba(9, 18, 36, 0.74);
         --line: rgba(185, 215, 255, 0.14);
+        --line-strong: rgba(185, 215, 255, 0.26);
         --text: #edf3ff;
         --soft: rgba(237, 243, 255, 0.74);
-        --dim: rgba(237, 243, 255, 0.54);
-        --accent: #9bd9ff;
-        --warm: #d7b97e;
-        --ok: #8ff1c8;
-        --shadow: 0 24px 72px rgba(0, 0, 0, 0.34);
-        --radius: 24px;
-        --max: 1220px;
+        --muted: rgba(237, 243, 255, 0.58);
+        --soft-alt: rgba(255, 255, 255, 0.06);
+        --blue: #9bd9ff;
+        --red: #ff7c7c;
+        --green: #8ff1c8;
+        --violet: #b48de0;
+        --gold: #d7b97e;
+        --max: 1240px;
       }
 
       * { box-sizing: border-box; }
@@ -31,18 +33,31 @@
         margin: 0;
         min-width: 320px;
         color: var(--text);
-        font-family: "Avenir Next", "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
         background:
           radial-gradient(circle at 18% 18%, rgba(90, 155, 255, 0.16), transparent 24%),
           radial-gradient(circle at 82% 10%, rgba(215, 185, 126, 0.12), transparent 20%),
           radial-gradient(circle at 50% 120%, rgba(76, 124, 255, 0.18), transparent 34%),
           linear-gradient(180deg, #07111f 0%, #040813 48%, #02050b 100%);
+        font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+        line-height: 1.7;
         overflow-x: hidden;
       }
       a { color: inherit; text-decoration: none; }
       img { display: block; max-width: 100%; }
       button, input, select { font: inherit; }
-      #starfield { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+      body, header, .paper-box, .figure .frame, .wrap, th, td, .param, input, select,
+      .download .box, .btn, .link-btn, .page-btn, .theme-toggle, .lang-toggle, #starfield, .orb {
+        transition: background 0.28s ease, color 0.28s ease, border-color 0.28s ease,
+          box-shadow 0.28s ease, opacity 0.28s ease;
+      }
+      #starfield {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
       .orb {
         position: fixed;
         border-radius: 999px;
@@ -65,16 +80,11 @@
         height: 32vw;
         background: radial-gradient(circle, rgba(215, 185, 126, 0.2), transparent 72%);
       }
-      .page { position: relative; z-index: 1; }
-      .glass {
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-          var(--panel);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(18px);
+      header, main, footer {
+        position: relative;
+        z-index: 1;
       }
+
       header {
         position: sticky;
         top: 0;
@@ -83,208 +93,163 @@
         background: rgba(4, 8, 16, 0.46);
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       }
-      .nav, .hero, .section, footer { max-width: var(--max); margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+      .nav, .hero, .section, footer {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding-left: 28px;
+        padding-right: 28px;
+      }
       .nav {
-        min-height: 74px;
+        min-height: 70px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 20px;
       }
-      .brand, .nav-links { display: flex; align-items: center; gap: 14px; }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand, .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
       .mark {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
+        width: 40px;
+        height: 40px;
         display: grid;
         place-items: center;
+        font-weight: 700;
         color: #071221;
-        font-weight: 800;
-        background: linear-gradient(135deg, var(--accent), var(--warm));
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--blue), var(--gold));
       }
-      .brand strong, h1, h2, h3 { letter-spacing: -0.04em; }
-      .brand-copy { display: grid; gap: 3px; }
-      .brand-copy strong { font-size: 16px; letter-spacing: 0.16em; text-transform: uppercase; }
-      .brand-copy span, .nav-links { color: var(--soft); font-size: 14px; }
-      .pill, .btn, .link-btn, .page-btn {
-        min-height: 46px;
-        padding: 0 18px;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+      .brand-copy {
+        display: grid;
+        gap: 2px;
       }
-      .pill {
-        min-height: 34px;
-        padding: 0 14px;
-        color: var(--accent);
-        background: rgba(155, 217, 255, 0.08);
-        border: 1px solid rgba(155, 217, 255, 0.18);
+      .brand-copy strong {
+        font-size: 16px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .brand-copy span, .nav-links {
+        color: var(--soft);
+        font-size: 14px;
+      }
+      .nav-links a { padding: 6px 0; }
+
+      .eyebrow {
+        margin-bottom: 14px;
+        color: var(--blue);
         font-size: 12px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
-      .btn {
-        background: linear-gradient(135deg, var(--warm), var(--accent));
-        color: #071221;
-        font-weight: 700;
+      h1, h2, h3 {
+        font-family: "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+        letter-spacing: -0.03em;
       }
-      .link-btn, .page-btn {
+      h1 {
+        margin: 0 0 18px;
+        font-size: clamp(38px, 5.8vw, 66px);
+        line-height: 0.96;
+      }
+      h2 {
+        margin: 0 0 12px;
+        font-size: clamp(28px, 4vw, 40px);
+        line-height: 1.05;
+      }
+      .lead, .copy p, .figcap, .table-top p, .download p {
+        color: var(--soft);
+      }
+
+      .hero {
+        padding-top: 86px;
+        padding-bottom: 30px;
+        display: block;
+      }
+      .hero-copy { width: 100%; }
+      .lead { max-width: 1000px; }
+      .actions {
+        margin-top: 26px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .btn, .link-btn, .page-btn {
+        min-height: 44px;
+        padding: 0 16px;
         border: 1px solid rgba(255, 255, 255, 0.14);
         background: rgba(255, 255, 255, 0.05);
         color: var(--text);
-      }
-      .hero {
-        padding-top: 86px;
-        padding-bottom: 28px;
-        display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-        gap: 28px;
+        display: inline-flex;
         align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 999px;
       }
-      h1 {
-        margin: 20px 0 16px;
-        font-size: clamp(40px, 6.2vw, 72px);
-        line-height: 0.98;
+      .theme-toggle {
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 999px;
       }
-      .lead, .copy p, .figcap, .table-top p, .download p { color: var(--soft); line-height: 1.84; }
-      .lead { margin: 0; max-width: 640px; font-size: 18px; }
-      .actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
-      .hero-box { padding: 24px; position: relative; overflow: hidden; }
-      .hero-box:before {
-        content: "";
-        position: absolute;
-        inset: 0;
+      .lang-toggle {
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 999px;
+      }
+      .btn {
+        background: linear-gradient(135deg, var(--gold), var(--blue));
+        color: #071221;
+        border-color: transparent;
+        font-weight: 700;
+      }
+      .hero-copy p { margin: 0 0 14px; }
+
+      .paper-box {
         background:
-          linear-gradient(135deg, rgba(155, 217, 255, 0.12), transparent 36%),
-          radial-gradient(circle at 84% 22%, rgba(215, 185, 126, 0.16), transparent 30%);
-        pointer-events: none;
+          linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+          var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        box-shadow: 0 24px 72px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(18px);
       }
-      .hero-box > * { position: relative; }
-      .status, .metrics { display: flex; align-items: center; gap: 10px; }
-      .status { justify-content: space-between; color: var(--soft); font-size: 14px; }
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--ok);
-        box-shadow: 0 0 16px rgba(143, 241, 200, 0.9);
-      }
-      .pulsar-wrap {
-        margin: 20px 0 14px;
-        min-height: 180px;
+
+      .section { padding-top: 26px; }
+      .grid2 {
         display: grid;
-        place-items: center;
+        grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+        gap: 22px;
       }
-      .pulsar {
-        position: relative;
-        width: min(34vw, 220px);
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-      }
-      .pulsar-halo {
-        position: absolute;
-        inset: 8%;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(155, 217, 255, 0.18), rgba(155, 217, 255, 0.02) 48%, transparent 70%);
-        filter: blur(8px);
-      }
-      .pulsar-ring,
-      .pulsar-ring:before,
-      .pulsar-ring:after {
-        position: absolute;
-        border-radius: 50%;
-        border: 1px solid rgba(155, 217, 255, 0.24);
-      }
-      .pulsar-ring {
-        inset: 18%;
-        animation: spin 7.2s linear infinite;
-        box-shadow: 0 0 24px rgba(155, 217, 255, 0.12);
-      }
-      .pulsar-ring:before,
-      .pulsar-ring:after {
-        content: "";
-        inset: -12%;
-      }
-      .pulsar-ring:before {
-        transform: scaleX(1.22) rotate(65deg);
-        border-color: rgba(215, 185, 126, 0.22);
-      }
-      .pulsar-ring:after {
-        transform: scaleY(1.18) rotate(-28deg);
-      }
-      .pulsar-beams {
-        position: absolute;
-        inset: 0;
-        animation: spin 3.8s linear infinite;
-      }
-      .beam {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 44%;
-        height: 140%;
-        transform-origin: 50% 50%;
-        translate: -50% -50%;
-        background: linear-gradient(180deg, rgba(155, 217, 255, 0), rgba(155, 217, 255, 0.68) 18%, rgba(215, 185, 126, 0.32) 50%, rgba(155, 217, 255, 0.68) 82%, rgba(155, 217, 255, 0));
-        clip-path: polygon(50% 0, 85% 42%, 63% 50%, 85% 58%, 50% 100%, 15% 58%, 37% 50%, 15% 42%);
-        filter: blur(1px);
-        opacity: 0.88;
-      }
-      .beam.beam-b {
-        transform: rotate(90deg);
-        opacity: 0.56;
-      }
-      .pulsar-core {
-        position: relative;
-        width: 20%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background: radial-gradient(circle at 35% 35%, #ffffff, #bfe7ff 42%, #7ddcff 68%, rgba(125, 220, 255, 0.14) 100%);
-        box-shadow:
-          0 0 20px rgba(155, 217, 255, 0.92),
-          0 0 44px rgba(155, 217, 255, 0.42),
-          0 0 88px rgba(215, 185, 126, 0.22);
-        z-index: 2;
-      }
-      .pulsar-spark {
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 62%);
-        animation: pulse 2.1s ease-in-out infinite;
-      }
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      @keyframes pulse {
-        0%, 100% { transform: scale(0.88); opacity: 0.58; }
-        50% { transform: scale(1.08); opacity: 1; }
-      }
-      .metrics { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-      .metric {
-        padding: 16px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .metric strong { display: block; margin-bottom: 7px; font-size: 24px; }
-      .section { padding-top: 24px; }
-      .grid2 { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(300px, 0.98fr); gap: 18px; }
       .card { padding: 26px; }
-      .eyebrow { margin-bottom: 14px; color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
-      h2 { margin: 0 0 12px; font-size: clamp(28px, 4.1vw, 40px); }
-      .copy { display: grid; gap: 18px; }
-      .figure { display: grid; gap: 16px; }
+      .copy { display: grid; gap: 16px; }
+      .figure { display: grid; gap: 14px; }
       .figure .frame {
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 18px;
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.03);
       }
       .figcap { font-size: 14px; }
+
       .table-top {
         display: flex;
         align-items: end;
@@ -299,12 +264,23 @@
       }
       .param {
         padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 16px;
         background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
       }
-      .param h3 { margin: 0 0 7px; font-size: 15px; }
-      .param p { margin: 0; color: var(--dim); font-size: 13px; line-height: 1.65; }
+      .param h3 {
+        margin: 0 0 7px;
+        font-size: 15px;
+        font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+      .param p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
       .table-card { margin-top: 18px; padding: 22px; }
       .tools {
         display: grid;
@@ -312,15 +288,27 @@
         gap: 14px;
         align-items: end;
       }
-      .tools h3 { margin: 0 0 8px; font-size: 24px; }
-      .tools p { margin: 0; color: var(--dim); line-height: 1.7; }
-      label { display: grid; gap: 8px; color: var(--dim); font-size: 13px; }
+      .tools h3 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      }
+      .tools p {
+        margin: 0;
+        color: var(--muted);
+      }
+      label {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
       input, select {
         width: 100%;
-        min-height: 46px;
-        padding: 0 14px;
-        border-radius: 14px;
+        min-height: 44px;
+        padding: 0 12px;
         border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 14px;
         background: rgba(255, 255, 255, 0.05);
         color: var(--text);
         outline: none;
@@ -331,19 +319,30 @@
         align-items: center;
         justify-content: space-between;
         gap: 16px;
-        color: var(--dim);
+        color: var(--muted);
         font-size: 14px;
       }
-      .pager { display: inline-flex; align-items: center; gap: 8px; }
-      .page-btn { cursor: pointer; }
-      .page-btn:disabled { opacity: 0.42; cursor: not-allowed; }
+      .pager {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
       .wrap {
         overflow: auto;
-        border-radius: 18px;
         border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
         background: rgba(3, 9, 18, 0.66);
       }
-      table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        white-space: nowrap;
+      }
       th, td { text-align: center !important; }
       th {
         position: sticky;
@@ -352,12 +351,14 @@
         padding: 14px;
         background: rgba(12, 25, 47, 0.96);
         border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        border-right: 1px solid rgba(255, 255, 255, 0.04);
         font-size: 13px;
         cursor: pointer;
         user-select: none;
       }
-      th.asc:after { content: " ↑"; color: var(--accent); }
-      th.desc:after { content: " ↓"; color: var(--accent); }
+      th:last-child { border-right: 0; }
+      th.asc:after { content: " ↑"; color: var(--blue); }
+      th.desc:after { content: " ↓"; color: var(--blue); }
       td {
         padding: 12px 14px;
         font-size: 13px;
@@ -365,10 +366,10 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         border-right: 1px solid rgba(255, 255, 255, 0.04);
       }
+      td:first-child { font-weight: 650; color: var(--text); }
       tr:nth-child(odd) td { background: rgba(255, 255, 255, 0.018); }
       tr:nth-child(even) td { background: rgba(155, 217, 255, 0.02); }
       tr:hover td { background: rgba(155, 217, 255, 0.07); }
-      td:first-child { font-weight: 650; color: var(--text); }
       td a {
         min-width: 34px;
         min-height: 34px;
@@ -376,11 +377,14 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 999px;
         border: 1px solid rgba(155, 217, 255, 0.22);
         background: rgba(155, 217, 255, 0.08);
+        border-radius: 999px;
       }
-      .empty td { padding: 26px 18px; color: var(--dim); }
+      .empty td {
+        padding: 26px 18px;
+        color: var(--muted);
+      }
       .asym {
         display: inline-grid;
         grid-template-columns: auto auto;
@@ -390,42 +394,193 @@
       }
       .asym .v, .sym .v { color: var(--text); }
       .asym .v { grid-row: 1 / span 2; grid-column: 1; }
-      .asym .u, .asym .d, .sym .pm, .sym .e { font-size: 0.78em; color: var(--soft); }
+      .asym .u, .asym .d, .sym .pm, .sym .e {
+        font-size: 0.78em;
+        color: var(--muted);
+      }
       .asym .u { grid-row: 1; grid-column: 2; align-self: end; }
       .asym .d { grid-row: 2; grid-column: 2; align-self: start; }
-      .sym { display: inline-flex; align-items: baseline; gap: 0.24ch; }
-      .download { padding-top: 24px; padding-bottom: 40px; }
+      .sym {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.24ch;
+      }
+
+      .download { padding-top: 24px; padding-bottom: 42px; }
       .download .box {
         padding: 30px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 22px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
         background:
           linear-gradient(135deg, rgba(155, 217, 255, 0.12), rgba(215, 185, 126, 0.1)),
           rgba(8, 18, 36, 0.78);
       }
-      .download h2 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 38px); }
-      .downloads { display: flex; flex-wrap: wrap; gap: 12px; }
-      .mail { margin-top: 14px; color: var(--dim); font-size: 14px; }
-      .mail a { color: var(--warm); }
-      footer { padding-bottom: 32px; color: var(--dim); font-size: 13px; }
+      .download h2 { margin: 0 0 10px; }
+      .downloads {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .downloads .link-btn {
+        border-color: transparent;
+        background: linear-gradient(135deg, var(--gold), var(--blue));
+        color: #071221;
+        font-weight: 700;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 10px 24px rgba(26, 74, 142, 0.16);
+      }
+      .mail {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .mail a { color: var(--gold); }
+      footer {
+        padding-bottom: 34px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      body[data-theme="day"] {
+        --panel: rgba(255, 255, 255, 0.78);
+        --line: rgba(44, 79, 119, 0.12);
+        --line-strong: rgba(44, 79, 119, 0.22);
+        --text: #18263a;
+        --soft: rgba(24, 38, 58, 0.78);
+        --muted: rgba(24, 38, 58, 0.62);
+        --soft-alt: rgba(22, 45, 81, 0.04);
+        --blue: #2f86eb;
+        --gold: #d2b16b;
+        background:
+          radial-gradient(circle at 16% 14%, rgba(138, 194, 255, 0.34), transparent 28%),
+          radial-gradient(circle at 84% 14%, rgba(255, 220, 168, 0.32), transparent 24%),
+          linear-gradient(180deg, #edf5ff 0%, #f8fbff 42%, #eef4fb 100%);
+      }
+      body[data-theme="day"] #starfield,
+      body[data-theme="day"] .orb {
+        opacity: 0;
+      }
+      body[data-theme="day"] header {
+        background: rgba(249, 252, 255, 0.92);
+        border-bottom: 1px solid rgba(24, 38, 58, 0.08);
+      }
+      body[data-theme="day"] .brand-copy span,
+      body[data-theme="day"] .nav-links {
+        color: rgba(24, 38, 58, 0.72);
+      }
+      body[data-theme="day"] .paper-box {
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.74)),
+          var(--panel);
+        box-shadow: 0 18px 44px rgba(47, 86, 135, 0.12);
+      }
+      body[data-theme="day"] .figure .frame {
+        border: 1px solid rgba(24, 38, 58, 0.08);
+        background: rgba(255, 255, 255, 0.58);
+      }
+      body[data-theme="day"] .param {
+        border: 1px solid rgba(24, 38, 58, 0.08);
+        background: rgba(255, 255, 255, 0.48);
+      }
+      body[data-theme="day"] .link-btn,
+      body[data-theme="day"] .page-btn,
+      body[data-theme="day"] .theme-toggle,
+      body[data-theme="day"] .lang-toggle {
+        border: 1px solid rgba(24, 38, 58, 0.14);
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--text);
+      }
+      body[data-theme="day"] input,
+      body[data-theme="day"] select {
+        border: 1px solid rgba(24, 38, 58, 0.14);
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--text);
+      }
+      body[data-theme="day"] .wrap {
+        border: 1px solid rgba(24, 38, 58, 0.08);
+        background: rgba(255, 255, 255, 0.62);
+      }
+      body[data-theme="day"] th {
+        background: #eaf1fa;
+        border-bottom: 1px solid rgba(24, 38, 58, 0.12);
+        border-right: 1px solid rgba(24, 38, 58, 0.05);
+        color: var(--text);
+      }
+      body[data-theme="day"] td {
+        color: rgba(24, 38, 58, 0.9);
+        border-bottom: 1px solid rgba(24, 38, 58, 0.08);
+        border-right: 1px solid rgba(24, 38, 58, 0.04);
+      }
+      body[data-theme="day"] td:first-child {
+        color: var(--text);
+      }
+      body[data-theme="day"] tr:nth-child(odd) td {
+        background: rgba(255, 255, 255, 0.72);
+      }
+      body[data-theme="day"] tr:nth-child(even) td {
+        background: rgba(47, 134, 235, 0.04);
+      }
+      body[data-theme="day"] tr:hover td {
+        background: rgba(47, 134, 235, 0.08);
+      }
+      body[data-theme="day"] td a {
+        border: 1px solid rgba(47, 134, 235, 0.24);
+        background: rgba(47, 134, 235, 0.08);
+      }
+      body[data-theme="day"] .download .box {
+        border: 1px solid rgba(24, 38, 58, 0.1);
+        background:
+          linear-gradient(135deg, rgba(131, 186, 247, 0.18), rgba(255, 220, 168, 0.18)),
+          rgba(255, 255, 255, 0.76);
+      }
+      body[data-theme="day"] .downloads .link-btn {
+        border-color: transparent;
+        background: linear-gradient(135deg, var(--gold), var(--blue));
+        color: #071221;
+        box-shadow: 0 10px 22px rgba(47, 134, 235, 0.16);
+      }
+
       @media (max-width: 1100px) {
-        .hero, .grid2, .download .box, .tools { grid-template-columns: 1fr; display: grid; }
+        .grid2, .download .box, .tools {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
         .param-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       }
       @media (max-width: 820px) {
-        .nav { flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
-        .nav-links { width: 100%; justify-content: space-between; }
-        .metrics, .param-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .meta { flex-direction: column; align-items: start; }
+        .nav {
+          flex-wrap: wrap;
+          padding-top: 12px;
+          padding-bottom: 12px;
+        }
+        .nav-links {
+          width: 100%;
+          justify-content: space-between;
+        }
+        .nav-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+        .param-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .meta {
+          flex-direction: column;
+          align-items: start;
+        }
       }
       @media (max-width: 640px) {
-        .nav, .hero, .section, footer { padding-left: 18px; padding-right: 18px; }
-        .card, .hero-box, .table-card, .download .box { padding: 20px; }
+        .nav, .hero, .section, footer {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+        .card, .table-card, .download .box { padding: 20px; }
         .actions, .downloads { flex-direction: column; }
-        .btn, .link-btn { width: 100%; }
-        .metrics, .param-grid { grid-template-columns: 1fr; }
+        .btn, .link-btn, .theme-toggle, .lang-toggle { width: 100%; }
+        .param-grid { grid-template-columns: 1fr; }
       }
     </style>
   </head>
@@ -433,190 +588,390 @@
     <canvas id="starfield" aria-hidden="true"></canvas>
     <div class="orb a"></div>
     <div class="orb b"></div>
-    <div class="page">
-      <header>
-        <div class="nav">
-          <a class="brand" href="#top" aria-label="RVMs home">
-            <span class="mark">R</span>
-            <span class="brand-copy">
-              <strong>RVMs</strong>
-              <span>Rotating Vector Model Atlas</span>
-            </span>
-          </a>
-          <nav class="nav-links" aria-label="Primary">
-            <a href="#overview">Overview</a>
-            <a href="#sky-map">Sky Map</a>
-            <a href="#table">Dataset</a>
-            <a href="#download">Download</a>
-          </nav>
-          <a class="link-btn" href="#table">Explore Data</a>
+    <header>
+      <div class="nav">
+        <a class="brand" href="#top" aria-label="RVMs home">
+          <span class="mark">R</span>
+          <span class="brand-copy">
+            <strong>RVMs</strong>
+            <span data-i18n="brand.subtitle">Rotating Vector Model Atlas</span>
+          </span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="#overview" data-i18n="nav.overview">Overview</a>
+          <a href="#sky-map" data-i18n="nav.skyMap">Sky Map</a>
+          <a href="#table" data-i18n="nav.dataset">Dataset</a>
+          <a href="#download" data-i18n="nav.download">Download</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">Day Mode</button>
+          <button id="lang-toggle" class="lang-toggle" type="button" aria-pressed="false">中文</button>
+          <a class="link-btn" href="#table" data-i18n="nav.explore">Explore Data</a>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <main id="top">
-        <section class="hero">
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow" data-i18n="hero.eyebrow">Premium Starfield Interface</div>
+          <h1 data-i18n="hero.title">Pulsar Emission-Geometry Parameters</h1>
+          <p class="lead" data-i18n-html="hero.lead">
+            Polarization observations provide one of the most direct probes of pulsar
+            magnetospheric geometry and emission physics. In the Rotating Vector Model,
+            the position-angle swing is governed by the magnetic inclination angle
+            <em>alpha</em> and the impact parameter <em>beta</em> as the emission cone
+            sweeps across the observer.
+          </p>
+          <div class="actions">
+            <a class="btn" href="#table" data-i18n="hero.viewTable">View the Table</a>
+            <a class="link-btn" href="#download" data-i18n="hero.downloadCsv">Download CSV Data</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="grid2">
+          <article class="paper-box card">
+            <div class="eyebrow" data-i18n="context.eyebrow">Scientific Context</div>
+            <div class="copy">
+              <p data-i18n-html="context.p1">
+                The Rotating Vector Model (RVM) provides a geometrical framework for interpreting pulsar
+                polarization. In this model, the observed swing of the linear polarization position angle
+                across pulse phase traces the projected dipolar magnetic field and constrains the viewing
+                geometry between the pulsar magnetic axis and the observer's line of sight.
+              </p>
+              <p data-i18n-html="context.p2">
+                With the rapid development of large radio telescopes such as FAST and MeerKAT, together
+                with high-sensitivity surveys including GPPS and the MeerKAT Thousand Pulsar Array, the
+                number of pulsars with polarization measurements has increased substantially. This enables
+                systematic, survey-scale RVM fitting and the construction of homogeneous pulsar geometry
+                catalogues.
+              </p>
+            </div>
+          </article>
+
+          <article class="paper-box card figure" id="sky-map">
+            <div class="eyebrow" data-i18n="sky.eyebrow">Sky Distribution</div>
+            <h2 data-i18n="sky.title">Pulsar sky map</h2>
+            <div class="frame">
+              <img src="RVM_pulsars/pulsar_mollweide_projection.png" alt="Pulsar sky distribution" />
+            </div>
+            <div class="figcap" data-i18n="sky.figcap">Figure. Distribution of pulsars in equatorial coordinates (RA/Dec).</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="table">
+        <div class="table-top">
           <div>
-            <span class="pill">Premium Starfield Interface</span>
-            <h1>Pulsar Geometrical Parameters</h1>
-            <div class="actions">
-              <a class="btn" href="#table">View the Table</a>
-              <a class="link-btn" href="#download">Download CSV Data</a>
-            </div>
+            <div class="eyebrow" data-i18n="table.eyebrow">Dataset Interface</div>
+            <h2 data-i18n="table.title">Searchable pulsar parameter table</h2>
           </div>
+        </div>
 
-          <aside class="glass hero-box" aria-label="Dataset summary">
-            <div class="status">
-              <span>Stable Rendering Status</span>
-              <span class="metrics"><span class="dot"></span> Ready</span>
-            </div>
-            <div class="pulsar-wrap" aria-hidden="true">
-              <div class="pulsar">
-                <div class="pulsar-halo"></div>
-                <div class="pulsar-ring"></div>
-                <div class="pulsar-beams">
-                  <div class="beam"></div>
-                  <div class="beam beam-b"></div>
-                </div>
-                <div class="pulsar-core"></div>
-                <div class="pulsar-spark"></div>
-              </div>
-            </div>
-            <div class="metrics">
-              <div class="metric"><strong id="mRows">0</strong><span>RVM fitted pulsars</span></div>
-              <div class="metric"><strong id="mScopes">0</strong><span>observatory sources</span></div>
-              <div class="metric"><strong id="mBands">0</strong><span>frequency bands</span></div>
-              <div class="metric"><strong id="mLinks">0</strong><span>plot and PDF links</span></div>
-            </div>
-          </aside>
-        </section>
-
-        <section class="section" id="overview">
-          <div class="grid2">
-            <article class="glass card">
-              <div class="eyebrow">Scientific Context</div>
-              <h2>RVM geometry, polarization, and large-survey scale</h2>
-              <div class="copy">
-                <p>
-                  The Rotating Vector Model (RVM) provides a geometrical framework for studying pulsar
-                  polarization, linking the observed variation of the linear polarization position angle
-                  across pulse phase to the geometrical relationship between the pulsar magnetic axis
-                  and the observer line of sight.
-                </p>
-                <p>
-                  With the rapid development of large radio telescopes such as FAST and MeerKAT, together
-                  with high-sensitivity observation programs including GPPS and the MeerKAT Thousand Pulsar
-                  Array, the number of pulsars with polarization measurements has increased significantly,
-                  enabling systematic RVM-fitting studies on an unprecedented scale.
-                </p>
-              </div>
-            </article>
-
-            <article class="glass card figure" id="sky-map">
-              <div class="eyebrow">Sky Distribution</div>
-              <h2>Pulsar sky map</h2>
-              <div class="frame">
-                <img src="RVM_pulsars/pulsar_mollweide_projection.png" alt="Pulsar sky distribution" />
-              </div>
-              <div class="figcap">Figure. Distribution of pulsars in equatorial coordinates (RA/Dec).</div>
-            </article>
+        <div class="paper-box card">
+          <div class="param-grid">
+            <article class="param"><h3>PSR</h3><p data-i18n="param.psr">Pulsar name in J2000 designation.</p></article>
+            <article class="param"><h3>P (s)</h3><p data-i18n="param.period">Spin period in seconds.</p></article>
+            <article class="param"><h3>Ṗ (s/s)</h3><p data-i18n="param.pdot">Period derivative.</p></article>
+            <article class="param"><h3 data-i18n="param.telescopeTitle">Telescope</h3><p data-i18n="param.telescope">Observation facility such as FAST or MeerKAT.</p></article>
+            <article class="param"><h3>Freq (MHz)</h3><p data-i18n="param.freq">Observing band in MHz.</p></article>
+            <article class="param"><h3>α₀ (°)</h3><p data-i18n="param.alpha">Magnetic inclination angle.</p></article>
+            <article class="param"><h3>β₀ (°)</h3><p data-i18n="param.beta">Impact angle.</p></article>
+            <article class="param"><h3>φ₀ (°)</h3><p data-i18n="param.phi">Phase of steepest PA gradient.</p></article>
+            <article class="param"><h3>ψ₀ (°)</h3><p data-i18n="param.psi">Reference polarization angle.</p></article>
+            <article class="param"><h3>χ²</h3><p data-i18n="param.chi">Reduced chi-squared of the fit.</p></article>
+            <article class="param"><h3>K</h3><p data-i18n="param.k">Maximum slope of the RVM curve.</p></article>
+            <article class="param"><h3>w3σ (°)</h3><p data-i18n="param.w3">Pulse width at the 3σ level.</p></article>
+            <article class="param"><h3>w3σ_center</h3><p data-i18n="param.w3center">Central phase of the 3σ pulse window.</p></article>
+            <article class="param"><h3>L/I (%)</h3><p data-i18n="param.li">Fractional linear polarization.</p></article>
+            <article class="param"><h3>V/I (%)</h3><p data-i18n="param.vi">Fractional circular polarization.</p></article>
+            <article class="param"><h3>📄 / 🖼</h3><p data-i18n="param.links">Confidence intervals and best-fit plot viewer links.</p></article>
           </div>
-        </section>
+        </div>
 
-        <section class="section" id="table">
-          <div class="table-top">
+        <div class="paper-box table-card">
+          <div class="tools">
             <div>
-              <div class="eyebrow">Dataset Interface</div>
-              <h2>Searchable pulsar parameter table</h2>
+              <h3 data-i18n="controls.title">Table controls</h3>
+              <p data-i18n="controls.copy">Search by pulsar, telescope, frequency, or parameter. Click any column header to sort.</p>
+            </div>
+            <label for="q">
+              <span data-i18n="controls.search">Search</span>
+              <input id="q" type="search" data-i18n-placeholder="controls.searchPlaceholder" placeholder="Type to filter rows" autocomplete="off" />
+            </label>
+            <label for="size">
+              <span data-i18n="controls.rows">Rows per page</span>
+              <select id="size">
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="meta">
+            <span id="summary" data-i18n="summary.loading">Loading dataset...</span>
+            <div class="pager">
+              <button id="prev" class="page-btn" type="button" data-i18n="controls.previous">Previous</button>
+              <span id="page" data-i18n="summary.pageInitial">Page 1 / 1</span>
+              <button id="next" class="page-btn" type="button" data-i18n="controls.next">Next</button>
             </div>
           </div>
 
-          <div class="glass card">
-            <div class="param-grid">
-              <article class="param"><h3>PSR</h3><p>Pulsar name in J2000 designation.</p></article>
-              <article class="param"><h3>P (s)</h3><p>Spin period in seconds.</p></article>
-              <article class="param"><h3>Ṗ (s/s)</h3><p>Period derivative.</p></article>
-              <article class="param"><h3>Telescope</h3><p>Observation facility such as FAST or MeerKAT.</p></article>
-              <article class="param"><h3>Freq (MHz)</h3><p>Observing band in MHz.</p></article>
-              <article class="param"><h3>α₀ (°)</h3><p>Magnetic inclination angle.</p></article>
-              <article class="param"><h3>β₀ (°)</h3><p>Impact angle.</p></article>
-              <article class="param"><h3>φ₀ (°)</h3><p>Phase of steepest PA gradient.</p></article>
-              <article class="param"><h3>ψ₀ (°)</h3><p>Reference polarization angle.</p></article>
-              <article class="param"><h3>χ²</h3><p>Reduced chi-squared of the fit.</p></article>
-              <article class="param"><h3>K</h3><p>Maximum slope of the RVM curve.</p></article>
-              <article class="param"><h3>w3σ (°)</h3><p>Pulse width at the 3σ level.</p></article>
-              <article class="param"><h3>w3σ_center</h3><p>Central phase of the 3σ pulse window.</p></article>
-              <article class="param"><h3>L/I (%)</h3><p>Fractional linear polarization.</p></article>
-              <article class="param"><h3>V/I (%)</h3><p>Fractional circular polarization.</p></article>
-              <article class="param"><h3>📄 / 🖼</h3><p>Confidence intervals and best-fit plot viewer links.</p></article>
-            </div>
+          <div class="wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>PSR</th><th>P (s)</th><th>Ṗ (s/s)</th><th data-i18n="thead.telescope">Telescope</th><th data-i18n="thead.freq">Freq(MHz)</th>
+                  <th>α₀ (°)</th><th>β₀ (°)</th><th>φ₀ (°)</th><th>ψ₀ (°)</th><th>χ²</th>
+                  <th>K</th><th>w3σ (°)</th><th>w3σ_center</th><th>L/I (%)</th><th>V/I (%)</th>
+                  <th data-i18n="thead.rvm">📄 2σ RVM</th><th data-i18n="thead.plot">🖼 RVM Plot</th>
+                </tr>
+              </thead>
+              <tbody id="body"></tbody>
+            </table>
           </div>
+        </div>
+      </section>
 
-          <div class="glass table-card">
-            <div class="tools">
-              <div>
-                <h3>Table controls</h3>
-                <p>Search by pulsar, telescope, frequency, or parameter. Click any column header to sort.</p>
-              </div>
-              <label for="q">
-                <span>Search</span>
-                <input id="q" type="search" placeholder="Type to filter rows" autocomplete="off" />
-              </label>
-              <label for="size">
-                <span>Rows per page</span>
-                <select id="size">
-                  <option value="20">20</option>
-                  <option value="50" selected>50</option>
-                  <option value="100">100</option>
-                  <option value="200">200</option>
-                  <option value="500">500</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="meta">
-              <span id="summary">Loading dataset...</span>
-              <div class="pager">
-                <button id="prev" class="page-btn" type="button">Previous</button>
-                <span id="page">Page 1 / 1</span>
-                <button id="next" class="page-btn" type="button">Next</button>
-              </div>
-            </div>
-
-            <div class="wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>PSR</th><th>P (s)</th><th>Ṗ (s/s)</th><th>Telescope</th><th>Freq(MHz)</th>
-                    <th>α₀ (°)</th><th>β₀ (°)</th><th>φ₀ (°)</th><th>ψ₀ (°)</th><th>χ²</th>
-                    <th>K</th><th>w3σ (°)</th><th>w3σ_center</th><th>L/I (%)</th><th>V/I (%)</th>
-                    <th>📄 2σ RVM</th><th>🖼 RVM Plot</th>
-                  </tr>
-                </thead>
-                <tbody id="body"></tbody>
-              </table>
-            </div>
+      <section class="section download" id="download">
+        <div class="box">
+          <div>
+            <div class="eyebrow" data-i18n="download.eyebrow">Download</div>
+            <h2 data-i18n="download.title">Export the FAST and MeerKAT RVM tables</h2>
+            <p data-i18n="download.copy">The original CSV downloads are preserved for direct quantitative analysis and follow-up modelling.</p>
+            <div class="mail"><span data-i18n="download.contact">Contact:</span> <a href="mailto:leihai5514@gmail.com">leihai5514@gmail.com</a></div>
           </div>
-        </section>
-
-        <section class="section download" id="download">
-          <div class="glass box">
-            <div>
-              <div class="eyebrow">Download</div>
-              <h2>Export the FAST and MeerKAT RVM tables</h2>
-              <p>The original CSV downloads are preserved for direct quantitative analysis and follow-up modelling.</p>
-              <div class="mail">Contact: <a href="mailto:leihai5514@gmail.com">leihai5514@gmail.com</a></div>
-            </div>
-            <div class="downloads">
-              <a href="table/GPTS.csv" download class="btn">Download GPTS.csv</a>
-              <a href="table/TPAS.csv" download class="link-btn">Download TPAS.csv</a>
-            </div>
+          <div class="downloads">
+            <a href="table/GPTS.csv" download class="btn" data-i18n="download.gpts">Download GPTS.csv</a>
+            <a href="table/TPAS.csv" download class="link-btn" data-i18n="download.tpas">Download TPAS.csv</a>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+    </main>
 
-    </div>
+    <footer></footer>
 
     <script>
+      (function () {
+        const dictionary = {
+          en: {
+            "brand.subtitle": "Rotating Vector Model Atlas",
+            "nav.overview": "Overview",
+            "nav.skyMap": "Sky Map",
+            "nav.dataset": "Dataset",
+            "nav.download": "Download",
+            "nav.explore": "Explore Data",
+            "hero.eyebrow": "Premium Starfield Interface",
+            "hero.title": "Pulsar Emission-Geometry Parameters",
+            "hero.lead": "Polarization observations provide one of the most direct probes of pulsar magnetospheric geometry and emission physics. In the Rotating Vector Model, the position-angle swing is governed by the magnetic inclination angle <em>alpha</em> and the impact parameter <em>beta</em> as the emission cone sweeps across the observer.",
+            "hero.viewTable": "View the Table",
+            "hero.downloadCsv": "Download CSV Data",
+            "context.eyebrow": "Scientific Context",
+            "context.p1": "The Rotating Vector Model (RVM) provides a geometrical framework for interpreting pulsar polarization. In this model, the observed swing of the linear polarization position angle across pulse phase traces the projected dipolar magnetic field and constrains the viewing geometry between the pulsar magnetic axis and the observer's line of sight.",
+            "context.p2": "With the rapid development of large radio telescopes such as FAST and MeerKAT, together with high-sensitivity surveys including GPPS and the MeerKAT Thousand Pulsar Array, the number of pulsars with polarization measurements has increased substantially. This enables systematic, survey-scale RVM fitting and the construction of homogeneous pulsar geometry catalogues.",
+            "sky.eyebrow": "Sky Distribution",
+            "sky.title": "Pulsar sky map",
+            "sky.figcap": "Figure. Distribution of pulsars in equatorial coordinates (RA/Dec).",
+            "table.eyebrow": "Dataset Interface",
+            "table.title": "Searchable pulsar parameter table",
+            "param.psr": "Pulsar name in J2000 designation.",
+            "param.period": "Spin period in seconds.",
+            "param.pdot": "Period derivative.",
+            "param.telescopeTitle": "Telescope",
+            "param.telescope": "Observation facility such as FAST or MeerKAT.",
+            "param.freq": "Observing band in MHz.",
+            "param.alpha": "Magnetic inclination angle.",
+            "param.beta": "Impact angle.",
+            "param.phi": "Phase of steepest PA gradient.",
+            "param.psi": "Reference polarization angle.",
+            "param.chi": "Reduced chi-squared of the fit.",
+            "param.k": "Maximum slope of the RVM curve.",
+            "param.w3": "Pulse width at the 3σ level.",
+            "param.w3center": "Central phase of the 3σ pulse window.",
+            "param.li": "Fractional linear polarization.",
+            "param.vi": "Fractional circular polarization.",
+            "param.links": "Confidence intervals and best-fit plot viewer links.",
+            "controls.title": "Table controls",
+            "controls.copy": "Search by pulsar, telescope, frequency, or parameter. Click any column header to sort.",
+            "controls.search": "Search",
+            "controls.searchPlaceholder": "Type to filter rows",
+            "controls.rows": "Rows per page",
+            "controls.previous": "Previous",
+            "controls.next": "Next",
+            "summary.loading": "Loading dataset...",
+            "summary.pageInitial": "Page 1 / 1",
+            "summary.noRows": "No rows match the current filter.",
+            "summary.showing": "Showing {a}–{b} of {total} matching rows ({all} total).",
+            "summary.page": "Page {page} / {pages}",
+            "summary.fail": "Dataset loading failed. Open this page through GitHub Pages or another HTTP server so the relative CSV files can be fetched.",
+            "download.eyebrow": "Download",
+            "download.title": "Export the FAST and MeerKAT RVM tables",
+            "download.copy": "The original CSV downloads are preserved for direct quantitative analysis and follow-up modelling.",
+            "download.contact": "Contact:",
+            "download.gpts": "Download GPTS.csv",
+            "download.tpas": "Download TPAS.csv",
+            "thead.telescope": "Telescope",
+            "thead.freq": "Freq(MHz)",
+            "thead.rvm": "📄 2σ RVM",
+            "thead.plot": "🖼 RVM Plot",
+            "theme.day": "Day Mode",
+            "theme.night": "Night Mode",
+            "theme.switchDay": "Switch to day mode",
+            "theme.switchNight": "Switch to night mode",
+            "lang.target": "中文"
+          },
+          zh: {
+            "brand.subtitle": "旋转矢量模型图集",
+            "nav.overview": "概览",
+            "nav.skyMap": "星图",
+            "nav.dataset": "数据表",
+            "nav.download": "下载",
+            "nav.explore": "浏览数据",
+            "hero.eyebrow": "高端星空界面",
+            "hero.title": "脉冲星发射几何参数",
+            "hero.lead": "极化观测为研究脉冲星磁层几何与辐射物理提供了最直接的探针之一。在旋转矢量模型中，位置角随脉冲相位的摆动由磁倾角 <em>alpha</em> 与冲击参数 <em>beta</em> 共同约束，同时反映发射锥扫过观测者视线的几何关系。",
+            "hero.viewTable": "查看表格",
+            "hero.downloadCsv": "下载 CSV 数据",
+            "context.eyebrow": "科学背景",
+            "context.p1": "旋转矢量模型（RVM）为解释脉冲星极化提供了几何框架。在该模型中，线偏振位置角随脉冲相位的摆动描绘了投影到天球平面的偶极磁场，并约束脉冲星磁轴与观测者视线之间的观测几何。",
+            "context.p2": "随着 FAST、MeerKAT 等大型射电望远镜的发展，以及 GPPS 和 MeerKAT Thousand Pulsar Array 等高灵敏度巡天的推进，具有极化测量的脉冲星数量已显著增加。这使得系统性的巡天尺度 RVM 拟合以及均一化脉冲星几何目录的构建成为可能。",
+            "sky.eyebrow": "天区分布",
+            "sky.title": "脉冲星天图",
+            "sky.figcap": "图：脉冲星在赤道坐标（RA/Dec）中的分布。",
+            "table.eyebrow": "数据界面",
+            "table.title": "可检索的脉冲星参数表",
+            "param.psr": "J2000 体制下的脉冲星名称。",
+            "param.period": "自转周期，单位为秒。",
+            "param.pdot": "周期导数。",
+            "param.telescopeTitle": "望远镜",
+            "param.telescope": "观测设施，例如 FAST 或 MeerKAT。",
+            "param.freq": "观测频段，单位 MHz。",
+            "param.alpha": "磁倾角。",
+            "param.beta": "冲击角。",
+            "param.phi": "位置角梯度最陡处的相位。",
+            "param.psi": "参考偏振位置角。",
+            "param.chi": "拟合的约化卡方。",
+            "param.k": "RVM 曲线的最大斜率。",
+            "param.w3": "3σ 水平下的脉冲宽度。",
+            "param.w3center": "3σ 脉冲窗口的中心相位。",
+            "param.li": "线偏振分数。",
+            "param.vi": "圆偏振分数。",
+            "param.links": "置信区间与最佳拟合图的查看链接。",
+            "controls.title": "表格控件",
+            "controls.copy": "可按脉冲星、望远镜、频率或参数搜索。点击任意列表头即可排序。",
+            "controls.search": "搜索",
+            "controls.searchPlaceholder": "输入关键词筛选行",
+            "controls.rows": "每页行数",
+            "controls.previous": "上一页",
+            "controls.next": "下一页",
+            "summary.loading": "正在加载数据...",
+            "summary.pageInitial": "第 1 / 1 页",
+            "summary.noRows": "当前筛选条件下没有匹配数据。",
+            "summary.showing": "显示 {a}–{b} / {total} 条匹配结果（总计 {all} 条）。",
+            "summary.page": "第 {page} / {pages} 页",
+            "summary.fail": "数据加载失败。请通过 GitHub Pages 或其他 HTTP 服务器打开此页面，以便获取相对路径 CSV 文件。",
+            "download.eyebrow": "下载",
+            "download.title": "导出 FAST 与 MeerKAT 的 RVM 表格",
+            "download.copy": "原始 CSV 下载仍然保留，便于定量分析与后续建模。",
+            "download.contact": "联系方式：",
+            "download.gpts": "下载 GPTS.csv",
+            "download.tpas": "下载 TPAS.csv",
+            "thead.telescope": "望远镜",
+            "thead.freq": "频率(MHz)",
+            "thead.rvm": "📄 2σ RVM",
+            "thead.plot": "🖼 RVM 图",
+            "theme.day": "白天模式",
+            "theme.night": "夜晚模式",
+            "theme.switchDay": "切换到白天模式",
+            "theme.switchNight": "切换到夜晚模式",
+            "lang.target": "English"
+          }
+        };
+
+        function interpolate(text, vars) {
+          return text.replace(/\{(\w+)\}/g, function (_, key) {
+            return vars && key in vars ? vars[key] : "";
+          });
+        }
+
+        window.rvmsLocale = {
+          dictionary: dictionary,
+          getLang: function () {
+            return document.documentElement.getAttribute("lang") === "zh-CN" ? "zh" : "en";
+          },
+          t: function (key, vars) {
+            const lang = this.getLang();
+            const table = dictionary[lang] || dictionary.en;
+            const fallback = dictionary.en[key] || key;
+            return interpolate(table[key] || fallback, vars);
+          }
+        };
+
+        const langKey = "rvms-lang";
+        const key = "rvms-theme";
+        const body = document.body;
+        const toggle = document.getElementById("theme-toggle");
+        const langToggle = document.getElementById("lang-toggle");
+
+        function applyLanguage(lang) {
+          const next = lang === "zh" ? "zh" : "en";
+          document.documentElement.setAttribute("lang", next === "zh" ? "zh-CN" : "en");
+          document.title = next === "zh" ? "脉冲星发射几何参数 | RVMs" : "Pulsar Emission-Geometry Parameters | RVMs";
+          document.querySelectorAll("[data-i18n]").forEach(function (node) {
+            node.textContent = window.rvmsLocale.t(node.getAttribute("data-i18n"));
+          });
+          document.querySelectorAll("[data-i18n-html]").forEach(function (node) {
+            node.innerHTML = window.rvmsLocale.t(node.getAttribute("data-i18n-html"));
+          });
+          document.querySelectorAll("[data-i18n-placeholder]").forEach(function (node) {
+            node.setAttribute("placeholder", window.rvmsLocale.t(node.getAttribute("data-i18n-placeholder")));
+          });
+          langToggle.textContent = window.rvmsLocale.t("lang.target");
+          langToggle.setAttribute("aria-pressed", String(next === "zh"));
+          window.dispatchEvent(new Event("rvms:localechange"));
+        }
+
+        function apply(theme) {
+          const next = theme === "day" ? "day" : "night";
+          const lang = window.rvmsLocale.getLang();
+          if (next === "day") body.setAttribute("data-theme", "day");
+          else body.removeAttribute("data-theme");
+          toggle.textContent = next === "day" ? dictionary[lang]["theme.night"] : dictionary[lang]["theme.day"];
+          toggle.setAttribute("aria-pressed", String(next === "day"));
+          toggle.setAttribute("aria-label", next === "day" ? dictionary[lang]["theme.switchNight"] : dictionary[lang]["theme.switchDay"]);
+        }
+
+        let savedLang = "en";
+        let saved = "night";
+        try {
+          savedLang = localStorage.getItem(langKey) || "en";
+          saved = localStorage.getItem(key) || "night";
+        } catch (e) {}
+        applyLanguage(savedLang);
+        apply(saved);
+
+        toggle.addEventListener("click", function () {
+          const next = body.getAttribute("data-theme") === "day" ? "night" : "day";
+          apply(next);
+          try {
+            localStorage.setItem(key, next);
+          } catch (e) {}
+        });
+        langToggle.addEventListener("click", function () {
+          const next = window.rvmsLocale.getLang() === "zh" ? "en" : "zh";
+          applyLanguage(next);
+          apply(body.getAttribute("data-theme") === "day" ? "day" : "night");
+          try {
+            localStorage.setItem(langKey, next);
+          } catch (e) {}
+        });
+      })();
+
       (function () {
         const c = document.getElementById("starfield");
         const x = c.getContext("2d");
@@ -629,7 +984,7 @@
           c.style.height = window.innerHeight + "px";
           x.setTransform(dpr, 0, 0, dpr, 0, 0);
           stars.length = 0;
-          const total = Math.max(80, Math.floor((window.innerWidth < 768 ? 110 : 150)));
+          const total = Math.max(80, Math.floor(window.innerWidth < 768 ? 110 : 150));
           for (let i = 0; i < total; i += 1) {
             stars.push({
               x: Math.random() * window.innerWidth,
@@ -659,7 +1014,10 @@
           for (const s of stars) {
             s.y += s.s;
             s.x += Math.sin(s.y * 0.01) * s.d * 0.06;
-            if (s.y > window.innerHeight + 3) { s.y = -8; s.x = Math.random() * window.innerWidth; }
+            if (s.y > window.innerHeight + 3) {
+              s.y = -8;
+              s.x = Math.random() * window.innerWidth;
+            }
             x.beginPath();
             x.fillStyle = "rgba(255,255,255," + s.a + ")";
             x.shadowBlur = 10;
@@ -688,14 +1046,10 @@
           prev: document.getElementById("prev"),
           next: document.getElementById("next"),
           body: document.getElementById("body"),
-          rows: document.getElementById("mRows"),
-          scopes: document.getElementById("mScopes"),
-          bands: document.getElementById("mBands"),
-          links: document.getElementById("mLinks"),
           heads: Array.from(document.querySelectorAll("thead th"))
         };
 
-        const state = { q: "", size: 50, page: 1, sort: null, dir: 1, rows: [] };
+        const state = { q: "", size: 50, page: 1, sort: null, dir: 1, rows: [], failed: false };
         const cols = [
           ["PSR", "t"], ["P0", "n"], ["P-dot", "n"], ["Telescope", "t"], ["Freq(MHz)", "t"],
           ["alpha", "n"], ["beta", "n"], ["phase", "n"], ["psi", "n"], ["chi", "n"],
@@ -815,15 +1169,8 @@
             if (i === state.sort) h.classList.add(state.dir === 1 ? "asc" : "desc");
           });
         }
-        function metrics() {
-          const scopes = new Set(), bands = new Set();
-          state.rows.forEach(function (r) { scopes.add(r.Telescope); bands.add(r["Freq(MHz)"]); });
-          refs.rows.textContent = String(state.rows.length);
-          refs.scopes.textContent = String(scopes.size);
-          refs.bands.textContent = String(bands.size);
-          refs.links.textContent = String(state.rows.length * 2);
-        }
         function render() {
+          state.failed = false;
           const rows = filtered();
           const total = rows.length;
           const pages = Math.max(1, Math.ceil(total / state.size));
@@ -832,11 +1179,11 @@
           const visible = rows.slice(from, from + state.size);
           refs.body.innerHTML = visible.length
             ? visible.map(row).join("")
-            : '<tr class="empty"><td colspan="17">No rows match the current filter.</td></tr>';
+            : '<tr class="empty"><td colspan="17">' + window.rvmsLocale.t("summary.noRows") + "</td></tr>";
           const a = total ? from + 1 : 0;
           const b = total ? Math.min(from + visible.length, total) : 0;
-          refs.summary.textContent = "Showing " + a + "–" + b + " of " + total + " matching rows (" + state.rows.length + " total).";
-          refs.page.textContent = "Page " + state.page + " / " + pages;
+          refs.summary.textContent = window.rvmsLocale.t("summary.showing", { a: a, b: b, total: total, all: state.rows.length });
+          refs.page.textContent = window.rvmsLocale.t("summary.page", { page: state.page, pages: pages });
           refs.prev.disabled = state.page <= 1;
           refs.next.disabled = state.page >= pages;
           heads();
@@ -856,6 +1203,7 @@
           refs.next.addEventListener("click", function () { state.page += 1; render(); });
         }
         function fail(msg) {
+          state.failed = true;
           refs.summary.textContent = msg;
           refs.body.innerHTML = '<tr class="empty"><td colspan="17">' + msg + "</td></tr>";
         }
@@ -865,13 +1213,25 @@
             if (!pair[0].ok || !pair[1].ok) throw new Error("csv");
             const text = await Promise.all(pair.map(function (r) { return r.text(); }));
             state.rows = build(text[1]).concat(build(text[0]));
-            metrics();
             render();
           } catch (e) {
-            fail("Dataset loading failed. Open this page through GitHub Pages or another HTTP server so the relative CSV files can be fetched.");
+            fail(window.rvmsLocale.t("summary.fail"));
           }
         }
         bind();
+        window.addEventListener("rvms:localechange", function () {
+          if (state.failed) {
+            fail(window.rvmsLocale.t("summary.fail"));
+            refs.page.textContent = window.rvmsLocale.t("summary.pageInitial");
+            return;
+          }
+          if (state.rows.length) {
+            render();
+            return;
+          }
+          refs.summary.textContent = window.rvmsLocale.t("summary.loading");
+          refs.page.textContent = window.rvmsLocale.t("summary.pageInitial");
+        });
         load();
       })();
     </script>
