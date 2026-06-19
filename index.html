@@ -170,7 +170,99 @@
         background: var(--ok);
         box-shadow: 0 0 16px rgba(143, 241, 200, 0.9);
       }
-      .native { margin: 18px 0 8px; font-size: clamp(44px, 6vw, 68px); font-weight: 760; }
+      .pulsar-wrap {
+        margin: 20px 0 14px;
+        min-height: 180px;
+        display: grid;
+        place-items: center;
+      }
+      .pulsar {
+        position: relative;
+        width: min(34vw, 220px);
+        aspect-ratio: 1;
+        display: grid;
+        place-items: center;
+      }
+      .pulsar-halo {
+        position: absolute;
+        inset: 8%;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(155, 217, 255, 0.18), rgba(155, 217, 255, 0.02) 48%, transparent 70%);
+        filter: blur(8px);
+      }
+      .pulsar-ring,
+      .pulsar-ring:before,
+      .pulsar-ring:after {
+        position: absolute;
+        border-radius: 50%;
+        border: 1px solid rgba(155, 217, 255, 0.24);
+      }
+      .pulsar-ring {
+        inset: 18%;
+        animation: spin 7.2s linear infinite;
+        box-shadow: 0 0 24px rgba(155, 217, 255, 0.12);
+      }
+      .pulsar-ring:before,
+      .pulsar-ring:after {
+        content: "";
+        inset: -12%;
+      }
+      .pulsar-ring:before {
+        transform: scaleX(1.22) rotate(65deg);
+        border-color: rgba(215, 185, 126, 0.22);
+      }
+      .pulsar-ring:after {
+        transform: scaleY(1.18) rotate(-28deg);
+      }
+      .pulsar-beams {
+        position: absolute;
+        inset: 0;
+        animation: spin 3.8s linear infinite;
+      }
+      .beam {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 44%;
+        height: 140%;
+        transform-origin: 50% 50%;
+        translate: -50% -50%;
+        background: linear-gradient(180deg, rgba(155, 217, 255, 0), rgba(155, 217, 255, 0.68) 18%, rgba(215, 185, 126, 0.32) 50%, rgba(155, 217, 255, 0.68) 82%, rgba(155, 217, 255, 0));
+        clip-path: polygon(50% 0, 85% 42%, 63% 50%, 85% 58%, 50% 100%, 15% 58%, 37% 50%, 15% 42%);
+        filter: blur(1px);
+        opacity: 0.88;
+      }
+      .beam.beam-b {
+        transform: rotate(90deg);
+        opacity: 0.56;
+      }
+      .pulsar-core {
+        position: relative;
+        width: 20%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #ffffff, #bfe7ff 42%, #7ddcff 68%, rgba(125, 220, 255, 0.14) 100%);
+        box-shadow:
+          0 0 20px rgba(155, 217, 255, 0.92),
+          0 0 44px rgba(155, 217, 255, 0.42),
+          0 0 88px rgba(215, 185, 126, 0.22);
+        z-index: 2;
+      }
+      .pulsar-spark {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.16), transparent 62%);
+        animation: pulse 2.1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(0.88); opacity: 0.58; }
+        50% { transform: scale(1.08); opacity: 1; }
+      }
       .metrics { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       .metric {
         padding: 16px;
@@ -377,7 +469,18 @@
               <span>Stable Rendering Status</span>
               <span class="metrics"><span class="dot"></span> Ready</span>
             </div>
-            <div class="native">Native</div>
+            <div class="pulsar-wrap" aria-hidden="true">
+              <div class="pulsar">
+                <div class="pulsar-halo"></div>
+                <div class="pulsar-ring"></div>
+                <div class="pulsar-beams">
+                  <div class="beam"></div>
+                  <div class="beam beam-b"></div>
+                </div>
+                <div class="pulsar-core"></div>
+                <div class="pulsar-spark"></div>
+              </div>
+            </div>
             <div class="metrics">
               <div class="metric"><strong id="mRows">0</strong><span>RVM fitted pulsars</span></div>
               <div class="metric"><strong id="mScopes">0</strong><span>observatory sources</span></div>
