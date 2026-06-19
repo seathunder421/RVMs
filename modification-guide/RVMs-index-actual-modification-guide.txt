@@ -1,0 +1,186 @@
+RVMs index.html 最终定稿修改说明
+
+目标文件
+1. 仓库：`seathunder421/RVMs`
+2. 正式文件：仓库根目录 `index.html`
+3. 当前定稿预览文件：`outputs/RVMs-index-github.html`
+
+这次最终版本的定位
+1. 保留原始科研内容、表格逻辑、CSV 下载与 `viewer.html?file=...` 链接协议。
+2. 首页风格使用深色高端星空版，不使用白底论文示意图版。
+3. 删除首屏右侧脉冲星示意图整块，只保留标题、说明和按钮。
+4. 新增两个交互开关：
+   `Day Mode / Night Mode`
+   `中文 / English`
+5. 提供一份详细修改说明文件，后续可据此把原始 `index.html` 改成同样效果。
+
+首页结构的最终要求
+1. 首屏保留品牌导航。
+2. 首屏主区只保留：
+   小标签 `Premium Starfield Interface`
+   主标题 `Pulsar Emission-Geometry Parameters`
+   一段说明文字
+   两个按钮：
+   `View the Table`
+   `Download CSV Data`
+3. 删除首屏右侧所有卡片、状态、图示、摘要统计。
+4. 首屏宽度与下方页面版心对齐。
+
+明确删除的旧内容
+1. 删除 `Native` 大字。
+2. 删除 `Stable Rendering Status / Ready`。
+3. 删除 4 个统计框：
+   `RVM fitted pulsars`
+   `observatory sources`
+   `frequency bands`
+   `plot and PDF links`
+4. 删除首屏右侧的脉冲星 SVG 图板块。
+5. 删除页脚提示文字，不在底部显示任何收尾文案。
+
+视觉风格最终方案
+1. 页面整体使用深蓝到黑色的渐变星空背景。
+2. 保留 `canvas#starfield` 和两层环境光晕：
+   `.orb.a`
+   `.orb.b`
+3. 内容卡片统一为深色玻璃质感：
+   半透明深色背景
+   细边框
+   模糊背景
+   柔和阴影
+4. 标题和关键按钮使用高对比的白色 / 金蓝渐变。
+
+导航区最终方案
+1. 左侧保留品牌：
+   `RVMs`
+   `Rotating Vector Model Atlas`
+2. 中间保留导航：
+   `Overview`
+   `Sky Map`
+   `Dataset`
+   `Download`
+3. 右侧保留 3 个控件：
+   主题切换按钮
+   语言切换按钮
+   `Explore Data`
+
+主题切换要求
+1. 新增按钮：`#theme-toggle`
+2. 默认是夜晚模式。
+3. 点击可在两种模式之间切换：
+   `night`
+   `day`
+4. 夜晚模式：
+   保留星空背景
+   深色卡片
+   深色表格
+5. 白天模式：
+   切为浅色背景
+   浅色卡片
+   浅色表格
+   隐藏星空层和环境光晕
+6. 当前主题要写入本地存储：
+   `localStorage["rvms-theme"]`
+
+语言切换要求
+1. 新增按钮：`#lang-toggle`
+2. 默认语言为英文。
+3. 点击在两种语言之间切换：
+   `en`
+   `zh`
+4. 不只是切换按钮文案，而是切换整页主要可见文字。
+5. 语言切换覆盖这些区域：
+   顶部导航
+   首页标题与说明
+   `Scientific Context`
+   `Sky Distribution`
+   `Dataset Interface`
+   参数说明卡片
+   表格控件区
+   下载区
+   动态提示文字
+6. 当前语言写入本地存储：
+   `localStorage["rvms-lang"]`
+
+首页主文案最终版本
+1. 首页主标题：
+   `Pulsar Emission-Geometry Parameters`
+2. 首页说明文字保留科学表述，不使用营销化介绍。
+3. 首页说明里保留：
+   `alpha`
+   `beta`
+   emission cone sweeps across the observer
+
+Scientific Context 卡片最终版本
+1. 仅保留上方小标签：
+   `Scientific Context`
+2. 删除大标题行，不再显示 `RVM geometry, polarization, and large-survey scale`。
+3. 正文第一段替换为：
+   The Rotating Vector Model (RVM) provides a geometrical framework for interpreting pulsar polarization. In this model, the observed swing of the linear polarization position angle across pulse phase traces the projected dipolar magnetic field and constrains the viewing geometry between the pulsar magnetic axis and the observer's line of sight.
+4. 正文第二段替换为：
+   With the rapid development of large radio telescopes such as FAST and MeerKAT, together with high-sensitivity surveys including GPPS and the MeerKAT Thousand Pulsar Array, the number of pulsars with polarization measurements has increased substantially. This enables systematic, survey-scale RVM fitting and the construction of homogeneous pulsar geometry catalogues.
+
+Sky Map 卡片最终版本
+1. 保留 `Pulsar sky map` 标题。
+2. 保留图片：
+   `RVM_pulsars/pulsar_mollweide_projection.png`
+3. 保留图注，但支持中英文切换。
+
+表格区域最终版本
+1. 表格标题保留：
+   `Searchable pulsar parameter table`
+2. 表格上方保留参数说明卡片网格。
+3. 表格交互保留原生 JavaScript 实现：
+   搜索
+   排序
+   分页
+4. 动态提示必须支持双语：
+   `Loading dataset...`
+   `No rows match the current filter.`
+   `Showing ...`
+   `Page ...`
+   `Dataset loading failed...`
+5. 表头中的部分文字也要支持双语：
+   `Telescope`
+   `Freq(MHz)`
+   `📄 2σ RVM`
+   `🖼 RVM Plot`
+
+下载区最终版本
+1. 保留下载区标题：
+   `Export the FAST and MeerKAT RVM tables`
+2. 保留下载按钮：
+   `Download GPTS.csv`
+   `Download TPAS.csv`
+3. 两个按钮最终都使用同一套颜色：
+   金色到浅蓝色渐变
+4. 第二个按钮不再是灰色描边风格。
+5. 第二个按钮文字也加粗，与第一个按钮字重一致。
+6. 联系方式保留：
+   `leihai5514@gmail.com`
+
+必须保留的数据能力
+1. `table/GPTS.csv`
+2. `table/TPAS.csv`
+3. 所有 `viewer.html?file=...` 链接协议
+4. 参数误差格式化逻辑
+5. 原生表格搜索、排序、分页逻辑
+
+和原始文件相比的关键改动摘要
+1. 移除首屏右侧图形区，只保留左侧内容。
+2. 深色星空背景重新保留并优化。
+3. 顶部新增主题切换。
+4. 顶部新增中英文切换。
+5. `Scientific Context` 标题删掉，只保留正文。
+6. 下载区第二个按钮颜色与第一个按钮统一。
+7. 页脚不再显示任何提示文字。
+
+正式写回建议
+1. 用当前预览文件整体覆盖仓库根目录 `index.html`。
+2. 在仓库中新增文件夹：
+   `modification-guide`
+3. 把本说明文件放入：
+   `modification-guide/RVMs-index-actual-modification-guide.txt`
+
+当前本地说明文件位置
+1. `outputs/RVMs-index-actual-modification-guide.txt`
+2. `outputs/modification-guide/RVMs-index-actual-modification-guide.txt`
