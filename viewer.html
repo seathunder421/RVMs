@@ -236,12 +236,11 @@
         min-height: 0;
         padding: 18px;
         display: grid;
-        grid-template-columns: 1fr 280px;
+        grid-template-columns: 1fr;
         gap: 18px;
       }
 
       .stage-card,
-      .side-card,
       .bottom-dock {
         background:
           linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
@@ -397,9 +396,7 @@
       }
 
       .loading-card p,
-      .error-card p,
-      .side-card p,
-      .side-card li {
+      .error-card p {
         margin: 0;
         color: var(--text-soft);
         line-height: 1.75;
@@ -413,72 +410,6 @@
         margin-bottom: 14px;
         font-size: 42px;
         color: var(--danger);
-      }
-
-      .side-card {
-        min-width: 0;
-        padding: 22px;
-        border-radius: var(--radius-xl);
-        display: grid;
-        align-content: start;
-        gap: 18px;
-      }
-
-      .side-card h2,
-      .side-card h3 {
-        margin: 0;
-      }
-
-      .side-card h2 {
-        font-size: 24px;
-        letter-spacing: -0.03em;
-      }
-
-      .status-line {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        color: var(--text-soft);
-        font-size: 14px;
-      }
-
-      .status-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--success);
-        box-shadow: 0 0 18px rgba(142, 241, 203, 0.84);
-      }
-
-      .kv-card {
-        padding: 16px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .kv-card strong {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 14px;
-        color: var(--text-dim);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-
-      .kv-card span {
-        display: block;
-        font-size: 15px;
-        line-height: 1.7;
-      }
-
-      .shortcut-list {
-        padding-left: 18px;
-        margin: 0;
-      }
-
-      .shortcut-list li + li {
-        margin-top: 8px;
       }
 
       .bottom-dock {
@@ -546,21 +477,6 @@
         transform: translateX(-50%) translateY(-2px);
       }
 
-      @media (max-width: 1100px) {
-        .viewer-shell {
-          grid-template-columns: 1fr;
-        }
-
-        .side-card {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          display: grid;
-        }
-
-        .side-card > :first-child {
-          grid-column: 1 / -1;
-        }
-      }
-
       @media (max-width: 760px) {
         .top-bar,
         .bottom-dock {
@@ -598,10 +514,6 @@
         .stage-area {
           min-height: 300px;
           padding: 12px;
-        }
-
-        .side-card {
-          grid-template-columns: 1fr;
         }
       }
 
@@ -681,42 +593,6 @@
             </div>
           </div>
         </section>
-
-        <aside class="side-card">
-          <div>
-            <div class="status-line">
-              <span class="status-dot"></span>
-              <span id="statusLine">Viewer shell initialized</span>
-            </div>
-            <h2>RVMs Viewer</h2>
-            <p>
-              This version keeps the original `viewer.html?file=...` contract,
-              but replaces the old neon-heavy presentation with a calmer deep-space
-              interface that is easier to read and feels more premium.
-            </p>
-          </div>
-
-          <div class="kv-card">
-            <strong>Mode</strong>
-            <span id="modeValue">Detecting file type</span>
-          </div>
-
-          <div class="kv-card">
-            <strong>Interaction</strong>
-            <span id="interactionValue">Waiting for content</span>
-          </div>
-
-          <div class="kv-card">
-            <strong>Shortcuts</strong>
-            <ul class="shortcut-list">
-              <li>`B` back</li>
-              <li>`D` download</li>
-              <li>`F` fullscreen</li>
-              <li>`R` reset view</li>
-              <li>`+` / `-` zoom</li>
-            </ul>
-          </div>
-        </aside>
       </main>
 
       <footer class="bottom-dock">
@@ -839,9 +715,6 @@
           stageTitle: document.getElementById("stageTitle"),
           stageSubtitle: document.getElementById("stageSubtitle"),
           statusChip: document.getElementById("statusChip"),
-          statusLine: document.getElementById("statusLine"),
-          modeValue: document.getElementById("modeValue"),
-          interactionValue: document.getElementById("interactionValue"),
           hintLine: document.getElementById("hintLine"),
           zoomDisplay: document.getElementById("zoomDisplay"),
           tooltip: document.getElementById("tooltip"),
@@ -888,7 +761,6 @@
         }
 
         function setStatus(text, chip) {
-          refs.statusLine.textContent = text;
           refs.statusChip.textContent = chip || "Ready";
         }
 
@@ -906,8 +778,6 @@
           refs.errorState.hidden = false;
           refs.errorTitle.textContent = title;
           refs.errorMessage.textContent = message;
-          refs.modeValue.textContent = "Error";
-          refs.interactionValue.textContent = "No interactive surface available";
           refs.hintLine.textContent = "Use Back to return to the table.";
           refs.fitBtn.disabled = true;
           refs.zoomInBtn.disabled = true;
@@ -941,7 +811,7 @@
           updateZoomDisplay();
         }
 
-        function fitImageToView(resetTranslation) {
+        function fitImageToView(resetTranslation, useInitialScale) {
           if (!state.mediaNode || state.mediaType !== "image") {
             return;
           }
@@ -956,9 +826,10 @@
           );
 
           state.fitScale = Math.max(0.08, fitScale);
-          state.minScale = Math.max(0.08, state.fitScale * 0.45);
+          const initialScale = Math.max(0.08, state.fitScale / 5);
+          state.minScale = Math.max(0.02, initialScale * 0.5);
           state.maxScale = Math.max(5, state.fitScale * 6);
-          state.currentScale = state.fitScale;
+          state.currentScale = useInitialScale ? initialScale : state.fitScale;
 
           if (resetTranslation) {
             state.translateX = 0;
@@ -966,14 +837,13 @@
           }
 
           updateTransform();
-          refs.interactionValue.textContent = "Drag to pan, wheel or buttons to zoom";
         }
 
         function resetView() {
           if (state.mediaType !== "image") {
             return;
           }
-          fitImageToView(true);
+          fitImageToView(true, true);
           showTooltip("View reset");
         }
 
@@ -992,7 +862,6 @@
           state.mediaType = "image";
           refs.fileBadge.textContent = "🖼";
           refs.fileTypeChip.textContent = "Image";
-          refs.modeValue.textContent = "Interactive image surface";
           refs.stageTitle.textContent = "Image viewer";
           refs.stageSubtitle.textContent = "Native zoom and pan";
           refs.hintLine.textContent = "Drag to pan. Double click or R to reset.";
@@ -1012,9 +881,8 @@
             refs.errorState.hidden = true;
             refs.mediaMount.appendChild(image);
             state.mediaNode = image;
-            fitImageToView(true);
+            fitImageToView(true, true);
             setStatus("Image ready", "Image");
-            refs.interactionValue.textContent = "Drag to pan, wheel or buttons to zoom";
           };
 
           image.onerror = function () {
@@ -1062,10 +930,8 @@
           state.mediaType = "pdf";
           refs.fileBadge.textContent = "📑";
           refs.fileTypeChip.textContent = "PDF";
-          refs.modeValue.textContent = "Browser PDF surface";
           refs.stageTitle.textContent = "PDF viewer";
           refs.stageSubtitle.textContent = "Embedded browser rendering";
-          refs.interactionValue.textContent = "Use the browser PDF viewer inside the frame";
           refs.hintLine.textContent = "Zoom controls are disabled for PDFs. Use the native PDF toolbar.";
           refs.fitBtn.disabled = true;
           refs.zoomInBtn.disabled = true;
@@ -1143,7 +1009,7 @@
         refs.downloadBtn.addEventListener("click", downloadFile);
         refs.fitBtn.addEventListener("click", function () {
           if (state.mediaType === "image") {
-            fitImageToView(true);
+            fitImageToView(true, false);
             showTooltip("Fit to view");
           }
         });
@@ -1195,7 +1061,7 @@
 
         window.addEventListener("resize", function () {
           if (state.mediaType === "image" && state.mediaNode) {
-            fitImageToView(false);
+            fitImageToView(false, false);
           }
         });
 
