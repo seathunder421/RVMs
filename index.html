@@ -6,7 +6,7 @@
     <title>Pulsar Emission-Geometry Parameters | RVMs</title>
     <meta
       name="description"
-      content="Premium RVMs pulsar parameter atlas with a stable CSV-driven interface."
+      content="Premium RVMs pulsar parameter atlas with a stable starfield interface and native CSV-driven table controls."
     />
     <style>
       :root {
@@ -577,7 +577,7 @@
           padding-left: 18px;
           padding-right: 18px;
         }
-        .card, .table-card, .download .box { padding: 20px; }
+        .card, .hero-box, .table-card, .download .box { padding: 20px; }
         .actions, .downloads { flex-direction: column; }
         .btn, .link-btn, .theme-toggle, .lang-toggle { width: 100%; }
         .param-grid { grid-template-columns: 1fr; }
@@ -620,7 +620,7 @@
             Polarization observations provide one of the most direct probes of pulsar
             magnetospheric geometry and emission physics. In the Rotating Vector Model,
             the position-angle swing is governed by the magnetic inclination angle
-            <em>alpha</em> and the impact parameter <em>beta</em> as the emission cone
+            <em>α</em> and the impact angle <em>β</em> as the emission cone
             sweeps across the observer.
           </p>
           <div class="actions">
@@ -768,7 +768,7 @@
             "nav.explore": "Explore Data",
             "hero.eyebrow": "Premium Starfield Interface",
             "hero.title": "Pulsar Emission-Geometry Parameters",
-            "hero.lead": "Polarization observations provide one of the most direct probes of pulsar magnetospheric geometry and emission physics. In the Rotating Vector Model, the position-angle swing is governed by the magnetic inclination angle <em>alpha</em> and the impact parameter <em>beta</em> as the emission cone sweeps across the observer.",
+            "hero.lead": "Polarization observations provide one of the most direct probes of pulsar magnetospheric geometry and emission physics. In the Rotating Vector Model, the position-angle swing is governed by the magnetic inclination angle <em>α</em> and the impact angle <em>β</em> as the emission cone sweeps across the observer.",
             "hero.viewTable": "View the Table",
             "hero.downloadCsv": "Download CSV Data",
             "context.eyebrow": "Scientific Context",
@@ -834,7 +834,7 @@
             "nav.explore": "浏览数据",
             "hero.eyebrow": "高端星空界面",
             "hero.title": "脉冲星发射几何参数",
-            "hero.lead": "极化观测为研究脉冲星磁层几何与辐射物理提供了最直接的探针之一。在旋转矢量模型中，位置角随脉冲相位的摆动由磁倾角 <em>alpha</em> 与冲击参数 <em>beta</em> 共同约束，同时反映发射锥扫过观测者视线的几何关系。",
+            "hero.lead": "极化观测为研究脉冲星磁层几何与辐射物理提供了最直接的探针之一。在旋转矢量模型中，位置角随脉冲相位的摆动由磁倾角 <em>α</em> 与碰撞角 <em>β</em> 共同约束，同时反映发射锥扫过观测者视线的几何关系。",
             "hero.viewTable": "查看表格",
             "hero.downloadCsv": "下载 CSV 数据",
             "context.eyebrow": "科学背景",
@@ -1085,6 +1085,14 @@
           const n = Number(v);
           return Number.isFinite(n) ? n.toFixed(d).replace(/\.?0+$/, "") : (v || "--");
         }
+        function fmtPeriod(v) {
+          const n = Number(v);
+          return Number.isFinite(n) ? n.toFixed(3) : (v || "--");
+        }
+        function fmtSci(v, d) {
+          const n = Number(v);
+          return Number.isFinite(n) ? n.toExponential(d).replace("e", "e") : (v || "--");
+        }
         function sym(v, e, d) {
           return '<span class="sym"><span class="v">' + fmt(v, d) + '</span><span class="pm">±</span><span class="e">' + fmt(e, d) + "</span></span>";
         }
@@ -1140,7 +1148,7 @@
         function row(r) {
           return [
             "<tr>",
-            "<td>", r.PSR, "</td><td>", r.P0, "</td><td>", r["P-dot"], "</td><td>", r.Telescope, "</td><td>", r["Freq(MHz)"], "</td>",
+            "<td>", r.PSR, "</td><td>", fmtPeriod(r.P0), "</td><td>", fmtSci(r["P-dot"], 2), "</td><td>", r.Telescope, "</td><td>", r["Freq(MHz)"], "</td>",
             "<td>", r.aH, "</td><td>", r.bH, "</td><td>", r.pH, "</td><td>", r.sH, "</td><td>", fmt(r.chi, 1), "</td>",
             "<td>", r.kH, "</td><td>", r.wH, "</td><td>", fmt(r.wCenter, 1), "</td><td>", r.lH, "</td><td>", r.vH, "</td>",
             '<td><a href="', r.pdf, '" target="_blank">📄</a></td><td><a href="', r.plot, '" target="_blank">🖼</a></td>',
@@ -1179,7 +1187,7 @@
           const visible = rows.slice(from, from + state.size);
           refs.body.innerHTML = visible.length
             ? visible.map(row).join("")
-            : '<tr class="empty"><td colspan="17">' + window.rvmsLocale.t("summary.noRows") + "</td></tr>";
+            : '<tr class="empty"><td colspan="17">' + window.rvmsLocale.t("summary.noRows") + "</td></tr>';
           const a = total ? from + 1 : 0;
           const b = total ? Math.min(from + visible.length, total) : 0;
           refs.summary.textContent = window.rvmsLocale.t("summary.showing", { a: a, b: b, total: total, all: state.rows.length });
@@ -1205,7 +1213,7 @@
         function fail(msg) {
           state.failed = true;
           refs.summary.textContent = msg;
-          refs.body.innerHTML = '<tr class="empty"><td colspan="17">' + msg + "</td></tr>";
+          refs.body.innerHTML = '<tr class="empty"><td colspan="17">' + msg + "</td></tr>';
         }
         async function load() {
           try {
