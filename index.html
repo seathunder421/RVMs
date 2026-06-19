@@ -1187,7 +1187,7 @@
           const visible = rows.slice(from, from + state.size);
           refs.body.innerHTML = visible.length
             ? visible.map(row).join("")
-            : '<tr class="empty"><td colspan="17">' + window.rvmsLocale.t("summary.noRows") + "</td></tr>';
+            : '<tr class="empty"><td colspan="17">' + window.rvmsLocale.t("summary.noRows") + "</td></tr>";
           const a = total ? from + 1 : 0;
           const b = total ? Math.min(from + visible.length, total) : 0;
           refs.summary.textContent = window.rvmsLocale.t("summary.showing", { a: a, b: b, total: total, all: state.rows.length });
@@ -1213,7 +1213,7 @@
         function fail(msg) {
           state.failed = true;
           refs.summary.textContent = msg;
-          refs.body.innerHTML = '<tr class="empty"><td colspan="17">' + msg + "</td></tr>';
+          refs.body.innerHTML = '<tr class="empty"><td colspan="17">' + msg + "</td></tr>";
         }
         async function load() {
           try {
